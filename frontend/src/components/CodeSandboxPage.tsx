@@ -13,6 +13,20 @@ interface CodeQuestion {
     starter_code: string;
     test_cases: string[];
     hints?: string[];
+    // AI-generated metadata
+    time_limit_ms?: number;
+    memory_limit_kb?: number;
+    topic_tags?: string[];
+    avg_cpu_time_ms?: number;
+    avg_memory_kb?: number;
+    avg_code_lines?: number;
+    // Computed metadata
+    desc_char_len?: number;
+    desc_word_count?: number;
+    num_sample_inputs?: number;
+    has_constraints?: boolean;
+    num_large_numbers?: number;
+    num_code_tokens?: number;
 }
 
 interface TestResult {
@@ -386,6 +400,52 @@ function CodeSandboxPage() {
 
                     <div className="sandbox-question-content">
                         <h2 className="sandbox-question-title">Challenge</h2>
+
+                        {/* Problem Metadata Panel */}
+                        {(currentQ.time_limit_ms || currentQ.topic_tags?.length) && (
+                            <div className="sandbox-meta-panel">
+                                <p className="sandbox-meta-note">These are reference targets for an efficient solution — there is no time limit on your attempt.</p>
+                                <div className="sandbox-meta-row">
+                                    {currentQ.time_limit_ms && (
+                                        <div className="sandbox-meta-stat">
+                                            <span className="sandbox-meta-label">Target Runtime</span>
+                                            <span className="sandbox-meta-value">{currentQ.time_limit_ms} ms</span>
+                                        </div>
+                                    )}
+                                    {currentQ.memory_limit_kb && (
+                                        <div className="sandbox-meta-stat">
+                                            <span className="sandbox-meta-label">Memory Budget</span>
+                                            <span className="sandbox-meta-value">{currentQ.memory_limit_kb >= 1024 ? `${currentQ.memory_limit_kb / 1024} MB` : `${currentQ.memory_limit_kb} KB`}</span>
+                                        </div>
+                                    )}
+                                    {currentQ.avg_cpu_time_ms != null && currentQ.avg_cpu_time_ms > 0 && (
+                                        <div className="sandbox-meta-stat">
+                                            <span className="sandbox-meta-label">Typical CPU</span>
+                                            <span className="sandbox-meta-value">{currentQ.avg_cpu_time_ms} ms</span>
+                                        </div>
+                                    )}
+                                    {currentQ.avg_memory_kb != null && currentQ.avg_memory_kb > 0 && (
+                                        <div className="sandbox-meta-stat">
+                                            <span className="sandbox-meta-label">Typical Memory</span>
+                                            <span className="sandbox-meta-value">{currentQ.avg_memory_kb >= 1024 ? `${(currentQ.avg_memory_kb / 1024).toFixed(1)} MB` : `${currentQ.avg_memory_kb} KB`}</span>
+                                        </div>
+                                    )}
+                                    {currentQ.avg_code_lines != null && currentQ.avg_code_lines > 0 && (
+                                        <div className="sandbox-meta-stat">
+                                            <span className="sandbox-meta-label">Typical Length</span>
+                                            <span className="sandbox-meta-value">{currentQ.avg_code_lines} lines</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {currentQ.topic_tags && currentQ.topic_tags.length > 0 && (
+                                    <div className="sandbox-meta-tags">
+                                        {currentQ.topic_tags.map((tag) => (
+                                            <span key={tag} className="sandbox-meta-tag">{tag.replace(/_/g, ' ')}</span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <div className="sandbox-markdown-body">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {questionMarkdown}

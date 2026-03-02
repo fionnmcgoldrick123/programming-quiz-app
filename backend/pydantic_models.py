@@ -22,6 +22,20 @@ class CodingQuestionSchema(BaseModel):
     starter_code: str = ""
     test_cases: List[str] = []
     hints: List[str] = []
+    # AI-generated metadata
+    time_limit_ms: int = 1000
+    memory_limit_kb: int = 65536
+    topic_tags: List[str] = []
+    avg_cpu_time_ms: int = 0
+    avg_memory_kb: int = 0
+    avg_code_lines: int = 0
+    # Computed from text
+    desc_char_len: int = 0
+    desc_word_count: int = 0
+    num_sample_inputs: int = 0
+    has_constraints: bool = False
+    num_large_numbers: int = 0
+    num_code_tokens: int = 0
 
 
 class ModelRequest(BaseModel):

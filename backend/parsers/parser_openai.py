@@ -1,4 +1,5 @@
 from pydantic_models import QuizSchema, CodingQuestionSchema
+from quiz_metadata import compute_coding_metadata
 import json
 
 
@@ -73,12 +74,23 @@ def openai_coding_parser(response: dict) -> list[CodingQuestionSchema]:
     questions = []
 
     for q in data.get("questions", []):
+        question = q["question"]
+        starter_code = q.get("starter_code", "")
+        test_cases = q.get("test_cases", [])
+        computed = compute_coding_metadata(question, starter_code, test_cases)
         questions.append(
             CodingQuestionSchema(
-                question=q["question"],
-                starter_code=q.get("starter_code", ""),
-                test_cases=q.get("test_cases", []),
+                question=question,
+                starter_code=starter_code,
+                test_cases=test_cases,
                 hints=q.get("hints", []),
+                time_limit_ms=q.get("time_limit_ms", 1000),
+                memory_limit_kb=q.get("memory_limit_kb", 65536),
+                topic_tags=q.get("topic_tags", []),
+                avg_cpu_time_ms=q.get("avg_cpu_time_ms", 0),
+                avg_memory_kb=q.get("avg_memory_kb", 0),
+                avg_code_lines=q.get("avg_code_lines", 0),
+                **computed,
             )
         )
     return questions
