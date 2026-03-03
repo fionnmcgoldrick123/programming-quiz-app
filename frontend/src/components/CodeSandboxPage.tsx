@@ -13,6 +13,7 @@ interface CodeQuestion {
     starter_code: string;
     test_cases: string[];
     hints?: string[];
+    difficulty?: string;
     // AI-generated metadata
     time_limit_ms?: number;
     memory_limit_kb?: number;
@@ -399,7 +400,17 @@ function CodeSandboxPage() {
                     </div>
 
                     <div className="sandbox-question-content">
-                        <h2 className="sandbox-question-title">Challenge</h2>
+                        <div className="sandbox-challenge-header">
+                            <h2 className="sandbox-question-title">Challenge</h2>
+                        </div>
+
+                        {/* Difficulty Banner */}
+                        {currentQ.difficulty && (
+                            <div className={`sandbox-difficulty-banner sandbox-difficulty-${currentQ.difficulty}`}>
+                                <span className="sandbox-difficulty-label">Difficulty</span>
+                                <span className="sandbox-difficulty-value">{currentQ.difficulty}</span>
+                            </div>
+                        )}
 
                         {/* Problem Metadata Panel */}
                         {(currentQ.time_limit_ms || currentQ.topic_tags?.length) && (

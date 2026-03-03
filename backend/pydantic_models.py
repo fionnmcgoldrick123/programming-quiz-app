@@ -22,6 +22,7 @@ class CodingQuestionSchema(BaseModel):
     starter_code: str = ""
     test_cases: List[str] = []
     hints: List[str] = []
+    difficulty: str = ""  # "easy" | "medium" | "hard" — predicted by ML model
     # AI-generated metadata
     time_limit_ms: int = 1000
     memory_limit_kb: int = 65536

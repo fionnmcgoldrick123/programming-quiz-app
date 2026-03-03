@@ -1,5 +1,6 @@
 from pydantic_models import QuizSchema, CodingQuestionSchema
 from quiz_metadata import compute_coding_metadata
+from difficulty_service import predict_difficulty_for_question
 import json
 
 
@@ -78,19 +79,19 @@ def openai_coding_parser(response: dict) -> list[CodingQuestionSchema]:
         starter_code = q.get("starter_code", "")
         test_cases = q.get("test_cases", [])
         computed = compute_coding_metadata(question, starter_code, test_cases)
-        questions.append(
-            CodingQuestionSchema(
-                question=question,
-                starter_code=starter_code,
-                test_cases=test_cases,
-                hints=q.get("hints", []),
-                time_limit_ms=q.get("time_limit_ms", 1000),
-                memory_limit_kb=q.get("memory_limit_kb", 65536),
-                topic_tags=q.get("topic_tags", []),
-                avg_cpu_time_ms=q.get("avg_cpu_time_ms", 0),
-                avg_memory_kb=q.get("avg_memory_kb", 0),
-                avg_code_lines=q.get("avg_code_lines", 0),
-                **computed,
-            )
+        schema = CodingQuestionSchema(
+            question=question,
+            starter_code=starter_code,
+            test_cases=test_cases,
+            hints=q.get("hints", []),
+            time_limit_ms=q.get("time_limit_ms", 1000),
+            memory_limit_kb=q.get("memory_limit_kb", 65536),
+            topic_tags=q.get("topic_tags", []),
+            avg_cpu_time_ms=q.get("avg_cpu_time_ms", 0),
+            avg_memory_kb=q.get("avg_memory_kb", 0),
+            avg_code_lines=q.get("avg_code_lines", 0),
+            **computed,
         )
+        schema.difficulty = predict_difficulty_for_question(schema)
+        questions.append(schema)
     return questions
