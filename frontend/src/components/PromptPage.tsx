@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
 import mcqIcon from "../assets/imgs/test.png";
 import codeIcon from "../assets/imgs/web-development.png";
-import userIcon from "../assets/imgs/user.png";
 
 type QuizType = "mcq" | "coding";
 
@@ -28,7 +27,7 @@ const models = [
 ];
 
 function PromptPage(){
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated, isLoading: authLoading, user } = useAuth();
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [quizType, setQuizType] = useState<QuizType | null>(null);
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
@@ -38,6 +37,12 @@ function PromptPage(){
     const [loading, setLoading] = useState(false);
     const [loadingTip, setLoadingTip] = useState(0);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            navigate('/login', { replace: true });
+        }
+    }, [authLoading, isAuthenticated, navigate]);
 
     const mcqTips = [
         "Crafting challenging questions...",
@@ -66,40 +71,9 @@ function PromptPage(){
         return () => clearInterval(interval);
     }, [loading, tips.length]);
 
-    // Redirect to login if not authenticated
-    if (!isAuthenticated) {
-        return (
-            <>
-                <Navbar />
-                <div className="prompt-page">
-                    <div className="auth-required-container">
-                        <div className="auth-required-card">
-                            <div className="auth-required-icon">
-                                <img src={userIcon} alt="Login Required" />
-                            </div>
-                            <h2 className="auth-required-title">Login Required</h2>
-                            <p className="auth-required-text">
-                                You need to be logged in to generate quizzes and track your progress.
-                            </p>
-                            <div className="auth-required-buttons">
-                                <button 
-                                    className="auth-login-button"
-                                    onClick={() => navigate('/login')}
-                                >
-                                    Login
-                                </button>
-                                <button 
-                                    className="auth-register-button"
-                                    onClick={() => navigate('/register')}
-                                >
-                                    Register
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
+    // Show nothing while auth state is being determined, or redirect handled by useEffect
+    if (authLoading || !isAuthenticated) {
+        return null;
     }
 
     async function handleModelChange(model: string) {

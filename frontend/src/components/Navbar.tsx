@@ -1,12 +1,16 @@
 import '../css-files/Navbar.css'
-import '../components/RegisterPage'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
 
 function Navbar(){
 
     const navigate = useNavigate()
-    const { user, isAuthenticated, logout } = useAuth()
+    const location = useLocation()
+    const { user, isAuthenticated } = useAuth()
+
+    const isInActiveQuiz =
+        location.pathname === '/quiz' ||
+        location.pathname === '/code-sandbox';
 
     function handleClick(path : string){
         navigate(path);
@@ -37,32 +41,34 @@ function Navbar(){
         navigate('/prompt');
     }
 
-    function handleLogout(){
-        logout();
-        navigate("/");
-    }
-
     return (
         <nav className="nav-container nav-centered">
             <div className="nav-logo" onClick={() => handleClick("/")}>CodeLearn</div>
             <div className="nav-links">
                 <button className="nav-button" onClick={() => handleClick("/")}>Home</button>
                 <button className="nav-button" onClick={handleQuizClick}>Quiz</button>
-                <button className="nav-button" onClick={() => handleClick("/prompt")}>Prompts</button>
-                <button className="nav-button" onClick={() => handleClick("/code-sandbox")}>Code Sandbox</button>
+                <button
+                    className="nav-button"
+                    onClick={() => !isInActiveQuiz && handleClick('/prompt')}
+                    disabled={isInActiveQuiz}
+                    title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
+                >Prompts</button>
+                <button
+                    className="nav-button"
+                    onClick={() => !isInActiveQuiz && handleClick('/code-sandbox')}
+                    disabled={isInActiveQuiz}
+                    title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
+                >Code Sandbox</button>
                 <button className="nav-button" onClick={() => handleClick("/resources")}>Resources</button>
                 <button className="nav-button" onClick={() => handleClick("/about")}>About</button>
                 <div className="nav-auth-buttons">
                 {isAuthenticated && user ? (
-                    <>
-                        <div className="nav-user-info" onClick={() => handleClick("/profile")}> 
-                            <span className="nav-user-avatar">
-                                {user.first_name.charAt(0).toUpperCase()}
-                            </span>
-                            <span className="nav-user-name">{user.first_name}</span>
-                        </div>
-                        <button className="nav-button nav-logout" onClick={handleLogout}>Logout</button>
-                    </>
+                    <div className="nav-user-info" onClick={() => handleClick("/profile")}>
+                        <span className="nav-user-avatar">
+                            {user.first_name.charAt(0).toUpperCase()}
+                        </span>
+                        <span className="nav-user-name">{user.first_name}</span>
+                    </div>
                 ) : (
                     <>
                         <button className="nav-button nav-login" onClick={() => handleClick("/login")}>Login</button>
