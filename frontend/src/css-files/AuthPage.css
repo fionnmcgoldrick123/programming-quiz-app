@@ -491,3 +491,102 @@
         font-size: 14px;
     }
 }
+
+/* ─── Wider container for register page ─────────────────────── */
+.auth-container-wide {
+    max-width: 560px;
+}
+
+/* ─── Password strength indicator ───────────────────────────── */
+.password-strength {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.strength-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.strength-bars {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+}
+
+.strength-bar-segment {
+    height: 5px;
+    flex: 1;
+    border-radius: 3px;
+    transition: background 0.35s ease;
+}
+
+.strength-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    min-width: 42px;
+    text-align: right;
+    transition: color 0.35s ease;
+}
+
+.requirements-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+}
+
+.requirement {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.25s ease;
+}
+
+.requirement.met {
+    color: #4caf50;
+}
+
+.requirement.unmet {
+    color: #666;
+}
+
+.req-icon {
+    font-size: 12px;
+    font-weight: 700;
+    width: 14px;
+    text-align: center;
+}
+
+/* ─── Confirm password match styles ─────────────────────────── */
+.input-group > input.input-match {
+    border-color: #4caf50;
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.25);
+}
+
+.input-group > input.input-mismatch {
+    border-color: #ff4444;
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.25);
+}
+
+.match-indicator {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.match-indicator.match {
+    color: #4caf50;
+}
+
+.match-indicator.no-match {
+    color: #ff4444;
+}
