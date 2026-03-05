@@ -96,18 +96,18 @@ function LandingPage(){
 
                         <div className="hero-stats">
                             <div className="stat">
-                                <span className="stat-number">10K+</span>
-                                <span className="stat-label">Active Users</span>
-                            </div>
-                            <div className="stat-divider"></div>
-                            <div className="stat">
-                                <span className="stat-number">50+</span>
+                                <span className="stat-number">12+</span>
                                 <span className="stat-label">Languages</span>
                             </div>
                             <div className="stat-divider"></div>
                             <div className="stat">
-                                <span className="stat-number">100K+</span>
-                                <span className="stat-label">Quizzes Taken</span>
+                                <span className="stat-number">3</span>
+                                <span className="stat-label">AI Models</span>
+                            </div>
+                            <div className="stat-divider"></div>
+                            <div className="stat">
+                                <span className="stat-number">5</span>
+                                <span className="stat-label">Difficulty Levels</span>
                             </div>
                         </div>
                     </div>
@@ -148,10 +148,6 @@ function LandingPage(){
                     <div className="feature-card">
                         <h3>Multiple Languages</h3>
                         <p>Learn JavaScript, Python, Java, C++, and more. Coverage across all major programming languages.</p>
-                    </div>
-                    <div className="feature-card">
-                        <h3>AI Feedback</h3>
-                        <p>Receive detailed explanations and suggestions to understand not just what you got wrong, but why.</p>
                     </div>
                     <div className="feature-card">
                         <h3>Progress Tracking</h3>
@@ -223,7 +219,7 @@ function LandingPage(){
             <section className="benefits-section">
                 <div className="section-header">
                     <h2>Transform Your Skills</h2>
-                    <p>Join thousands of developers improving their craft</p>
+                    <p>Built to help you learn faster and retain more</p>
                 </div>
 
                 <div className="benefits-container">
@@ -254,7 +250,7 @@ function LandingPage(){
             <section className="final-cta-section">
                 <div className="cta-content">
                     <h2>Ready to Level Up Your Coding?</h2>
-                    <p>Join thousands of developers already improving their skills with CodeQuiz</p>
+                    <p>Pick a language, pick a topic — and start building real knowledge today</p>
                     <button className="cta-button primary large" onClick={handleGetStarted}>
                         {isAuthenticated ? "Start Your First Quiz" : "Start Learning for Free"}
                     </button>

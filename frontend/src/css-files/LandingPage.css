@@ -1,7 +1,7 @@
 /* ========== GENERAL STYLES ========== */
 .landing-page-wrapper {
     width: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #111111;
     font-family: 'Source Code Pro', monospace;
     color: #fff;
     overflow-x: hidden;
@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: center;
     padding: 60px 80px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #111111;
     position: relative;
 }
 
@@ -26,9 +26,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 149, 0, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 149, 0, 0.05) 0%, transparent 50%);
+    background:
+        radial-gradient(ellipse at 15% 60%, rgba(255, 149, 0, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 30%, rgba(255, 119, 0, 0.06) 0%, transparent 50%);
     pointer-events: none;
 }
 
@@ -195,14 +195,14 @@
 
 .floating-card {
     position: absolute;
-    background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
-    border: 2px solid #404040;
-    border-radius: 12px;
-    padding: 30px;
+    background: #1c1c1c;
+    border: 1px solid #2e2e2e;
+    border-radius: 10px;
+    padding: 28px 24px;
     text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
-    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    transition: border-color 0.3s ease;
+    cursor: default;
 }
 
 .floating-card:hover {
@@ -261,8 +261,9 @@
 
 /* ========== FEATURES SECTION ========== */
 .features-section {
-    padding: 80px 80px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+    padding: 90px 80px;
+    background: #161616;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
 }
 
 .section-header {
@@ -271,16 +272,31 @@
 }
 
 .section-header h2 {
-    font-size: 2.8em;
+    font-size: 2.6em;
     font-weight: 700;
     color: #ffffff;
-    margin: 0 0 20px 0;
+    margin: 0 0 16px 0;
     letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 18px;
+}
+
+.section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff9500, #ff7700);
+    border-radius: 2px;
 }
 
 .section-header p {
-    font-size: 1.1em;
-    color: #a0a0a0;
+    font-size: 1.05em;
+    color: #888888;
     margin: 0;
 }
 
@@ -293,38 +309,42 @@
 }
 
 .feature-card {
-    background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
-    border: 2px solid #404040;
-    border-radius: 12px;
-    padding: 40px;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 36px 32px;
+    text-align: left;
+    transition: all 0.25s ease;
+    cursor: default;
+    border-left: 3px solid transparent;
 }
 
 .feature-card:hover {
-    transform: translateY(-8px);
-    border-color: #ff9500;
-    box-shadow: 0 12px 40px rgba(255, 149, 0, 0.2);
+    border-left-color: #ff9500;
+    background: #1f1f1f;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
 }
 
 .feature-card h3 {
-    color: #ff9500;
-    font-size: 1.5em;
-    margin: 0 0 15px 0;
+    color: #ffffff;
+    font-size: 1.15em;
+    margin: 0 0 12px 0;
+    font-weight: 600;
 }
 
 .feature-card p {
-    color: #a0a0a0;
-    font-size: 0.95em;
-    line-height: 1.6;
+    color: #888888;
+    font-size: 0.92em;
+    line-height: 1.65;
     margin: 0;
 }
 
 /* ========== HOW IT WORKS SECTION ========== */
 .how-it-works-section {
-    padding: 80px 80px;
-    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    padding: 90px 80px;
+    background: #111111;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
 }
 
 .steps-container {
@@ -338,18 +358,18 @@
 
 .step {
     flex: 1;
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
-    border: 2px solid #404040;
-    border-radius: 12px;
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
     padding: 40px 30px;
     text-align: center;
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .step:hover {
-    border-color: #ff9500;
-    transform: translateY(-5px);
+    border-color: rgba(255, 149, 0, 0.4);
+    transform: translateY(-4px);
 }
 
 .step-number {
@@ -389,8 +409,9 @@
 
 /* ========== LANGUAGES SECTION ========== */
 .languages-section {
-    padding: 80px 80px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 90px 80px;
+    background: #161616;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
 }
 
 .languages-grid {
@@ -402,28 +423,30 @@
 }
 
 .language-badge {
-    background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
-    border: 2px solid #404040;
-    padding: 20px;
-    border-radius: 12px;
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    padding: 18px 12px;
+    border-radius: 8px;
     text-align: center;
-    color: #ff9500;
-    font-weight: 600;
-    font-size: 1em;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    color: #cccccc;
+    font-weight: 500;
+    font-size: 0.95em;
+    cursor: default;
+    transition: all 0.25s ease;
+    letter-spacing: 0.3px;
 }
 
 .language-badge:hover {
-    border-color: #ff9500;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(255, 149, 0, 0.2);
+    border-color: rgba(255, 149, 0, 0.5);
+    color: #ff9500;
+    transform: translateY(-3px);
 }
 
 /* ========== BENEFITS SECTION ========== */
 .benefits-section {
-    padding: 80px 80px;
-    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    padding: 90px 80px;
+    background: #111111;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
 }
 
 .benefits-container {
@@ -436,8 +459,16 @@
 
 .benefit-item {
     text-align: center;
-    padding: 30px;
-    position: relative;
+    padding: 30px 20px;
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+.benefit-item:hover {
+    border-color: rgba(255, 149, 0, 0.3);
+    transform: translateY(-4px);
 }
 
 .benefit-check {
@@ -470,8 +501,9 @@
 
 /* ========== FINAL CTA SECTION ========== */
 .final-cta-section {
-    padding: 80px 80px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 100px 80px;
+    background: #161616;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
     text-align: center;
     position: relative;
 }
@@ -483,8 +515,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 50% 0%, rgba(255, 149, 0, 0.1) 0%, transparent 50%);
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 149, 0, 0.08) 0%, transparent 60%);
     pointer-events: none;
 }
 

@@ -42,39 +42,41 @@ function Navbar(){
     }
 
     return (
-        <nav className="nav-container nav-centered">
-            <div className="nav-logo" onClick={() => handleClick("/")}>CodeLearn</div>
-            <div className="nav-links">
-                <button className="nav-button" onClick={() => handleClick("/")}>Home</button>
-                <button className="nav-button" onClick={handleQuizClick}>Quiz</button>
-                <button
-                    className="nav-button"
-                    onClick={() => !isInActiveQuiz && handleClick('/prompt')}
-                    disabled={isInActiveQuiz}
-                    title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
-                >Prompts</button>
-                <button
-                    className="nav-button"
-                    onClick={() => !isInActiveQuiz && handleClick('/code-sandbox')}
-                    disabled={isInActiveQuiz}
-                    title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
-                >Code Sandbox</button>
-                <button className="nav-button" onClick={() => handleClick("/resources")}>Resources</button>
-                <button className="nav-button" onClick={() => handleClick("/about")}>About</button>
+        <nav className="nav-container">
+            <div className="nav-inner">
+                <div className="nav-logo" onClick={() => handleClick("/")}>CodeQuiz</div>
+
+                <div className="nav-links">
+                    <button className="nav-button" onClick={() => handleClick("/")}>Home</button>
+                    <button className="nav-button" onClick={handleQuizClick}>Quiz</button>
+                    <button
+                        className="nav-button"
+                        onClick={() => !isInActiveQuiz && handleClick('/prompt')}
+                        disabled={isInActiveQuiz}
+                        title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
+                    >Prompts</button>
+                    <button
+                        className="nav-button"
+                        onClick={() => !isInActiveQuiz && handleClick('/code-sandbox')}
+                        disabled={isInActiveQuiz}
+                        title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
+                    >Code Sandbox</button>
+                </div>
+
                 <div className="nav-auth-buttons">
-                {isAuthenticated && user ? (
-                    <div className="nav-user-info" onClick={() => handleClick("/profile")}>
-                        <span className="nav-user-avatar">
-                            {user.first_name.charAt(0).toUpperCase()}
-                        </span>
-                        <span className="nav-user-name">{user.first_name}</span>
-                    </div>
-                ) : (
-                    <>
-                        <button className="nav-button nav-login" onClick={() => handleClick("/login")}>Login</button>
-                        <button className="nav-button nav-register" onClick={() => handleClick("/register")}>Register</button>
-                    </>
-                )}
+                    {isAuthenticated && user ? (
+                        <div className="nav-user-info" onClick={() => handleClick("/profile")}>
+                            <span className="nav-user-avatar">
+                                {user.first_name.charAt(0).toUpperCase()}
+                            </span>
+                            <span className="nav-user-name">{user.first_name}</span>
+                        </div>
+                    ) : (
+                        <>
+                            <button className="nav-button nav-login" onClick={() => handleClick("/login")}>Login</button>
+                            <button className="nav-button nav-register" onClick={() => handleClick("/register")}>Register</button>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>
