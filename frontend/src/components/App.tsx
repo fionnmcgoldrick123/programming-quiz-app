@@ -8,6 +8,7 @@ import RegisterPage from './RegisterPage';
 import QuizPage from './QuizPage';
 import UserPage from './UserPage';
 import CodeSandboxPage from './CodeSandboxPage';
+import AboutPage from './AboutPage';
 
 function App() {
   return(
@@ -22,6 +23,7 @@ function App() {
           <Route path="/profile" element = {<UserPage/>} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/code-sandbox" element={<CodeSandboxPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </AuthProvider>
     </Router>

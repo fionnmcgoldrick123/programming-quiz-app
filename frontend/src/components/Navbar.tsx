@@ -49,6 +49,7 @@ function Navbar(){
                 <div className="nav-links">
                     <button className="nav-button" onClick={() => handleClick("/")}>Home</button>
                     <button className="nav-button" onClick={handleQuizClick}>Quiz</button>
+                    <button className="nav-button" onClick={() => handleClick("/about")}>About</button>
                     <button
                         className="nav-button"
                         onClick={() => !isInActiveQuiz && handleClick('/prompt')}

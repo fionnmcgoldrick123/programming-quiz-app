@@ -1,0 +1,400 @@
+/* ========== WRAPPER ========== */
+.about-page-wrapper {
+    width: 100%;
+    background: #111111;
+    font-family: 'Source Code Pro', monospace;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* ========== HERO ========== */
+.about-hero {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 80px 70px;
+    background: #111111;
+    position: relative;
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 70%, rgba(255, 149, 0, 0.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 119, 0, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.about-hero-content {
+    max-width: 800px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.about-tag {
+    font-size: 0.85em;
+    color: #ff9500;
+    letter-spacing: 1px;
+    opacity: 0.85;
+}
+
+.about-hero-title {
+    font-size: 3em;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+
+.about-highlight {
+    color: #ff9500;
+}
+
+.about-hero-sub {
+    font-size: 1.05em;
+    color: #a0a0a0;
+    line-height: 1.75;
+    max-width: 680px;
+    margin: 0;
+}
+
+/* ========== GENERIC SECTION ========== */
+.about-section {
+    padding: 90px 80px;
+    background: #111111;
+    border-top: 1px solid rgba(255, 149, 0, 0.12);
+}
+
+.about-section-alt {
+    background: #161616;
+}
+
+.about-section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about-section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.about-section-header h2 {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 14px 0;
+    letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 18px;
+}
+
+.about-section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff9500, #ff7700);
+    border-radius: 2px;
+}
+
+.about-section-header p {
+    font-size: 0.95em;
+    color: #888888;
+    margin: 0;
+}
+
+/* ========== OFFER CARDS ========== */
+.about-offer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 30px;
+}
+
+.about-offer-card {
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 44px 38px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
+}
+
+.about-offer-card:hover {
+    border-left-color: #ff9500;
+    background: #1f1f1f;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transform: translateY(-4px);
+}
+
+.about-offer-icon {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #ff9500;
+    letter-spacing: 2px;
+}
+
+.about-icon-bracket {
+    color: #555555;
+}
+
+.about-offer-card h3 {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.about-offer-card p {
+    font-size: 0.92em;
+    color: #888888;
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* ========== AI STEPS GRID ========== */
+.about-ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+}
+
+.about-ai-card {
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 36px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-ai-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff9500, #ff7700);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.about-ai-card:hover::before {
+    opacity: 1;
+}
+
+.about-ai-card:hover {
+    background: #1f1f1f;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
+}
+
+.about-ai-number {
+    font-size: 2em;
+    font-weight: 700;
+    color: rgba(255, 149, 0, 0.25);
+    line-height: 1;
+}
+
+.about-ai-card h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.about-ai-card p {
+    font-size: 0.91em;
+    color: #888888;
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* ========== TECH STACK ========== */
+.about-tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.about-tech-card {
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 36px 32px;
+    transition: all 0.25s ease;
+}
+
+.about-tech-card:hover {
+    border-color: rgba(255, 149, 0, 0.35);
+    background: #1f1f1f;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.about-tech-label {
+    display: inline-block;
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ff9500;
+    margin-bottom: 18px;
+    padding: 4px 12px;
+    background: rgba(255, 149, 0, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 149, 0, 0.2);
+}
+
+.about-tech-card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.about-tech-card ul li {
+    font-size: 0.92em;
+    color: #aaaaaa;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.about-tech-card ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: #ff9500;
+    font-weight: 700;
+}
+
+/* ========== CTA SECTION ========== */
+.about-cta-section {
+    padding: 90px 80px;
+    background: #0d0d0d;
+    border-top: 1px solid rgba(255, 149, 0, 0.15);
+    text-align: center;
+}
+
+.about-cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.about-cta-inner h2 {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.about-cta-inner p {
+    font-size: 1em;
+    color: #888888;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.about-cta-button {
+    margin-top: 10px;
+    padding: 16px 52px;
+    background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 149, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.about-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(255, 149, 0, 0.5);
+}
+
+.about-cta-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(255, 149, 0, 0.3);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 900px) {
+    .about-hero {
+        padding: 60px 40px 50px;
+    }
+
+    .about-hero-title {
+        font-size: 2.2em;
+    }
+
+    .about-section {
+        padding: 60px 40px;
+    }
+
+    .about-cta-section {
+        padding: 60px 40px;
+    }
+}
+
+@media (max-width: 600px) {
+    .about-hero {
+        padding: 50px 24px 40px;
+    }
+
+    .about-hero-title {
+        font-size: 1.8em;
+    }
+
+    .about-section {
+        padding: 50px 24px;
+    }
+
+    .about-offer-grid,
+    .about-ai-grid,
+    .about-tech-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-cta-section {
+        padding: 50px 24px;
+    }
+
+    .about-cta-inner h2 {
+        font-size: 1.7em;
+    }
+}
