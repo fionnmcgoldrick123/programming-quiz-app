@@ -20,6 +20,10 @@ function LandingPage(){
     const [currentPhrase, setCurrentPhrase] = useState(0);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const scrollTo = (id: string) => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    };
+
     useEffect(() => {
         let timeout: ReturnType<typeof setTimeout>;
         const currentFullText = phrases[currentPhrase];
@@ -130,7 +134,7 @@ function LandingPage(){
             </section>
 
             {/* FEATURES SECTION */}
-            <section className="features-section">
+            <section id="features" className="features-section">
                 <div className="section-header">
                     <h2>Why Choose CodeQuiz?</h2>
                     <p>Everything you need to master programming</p>
@@ -161,7 +165,7 @@ function LandingPage(){
             </section>
 
             {/* HOW IT WORKS SECTION */}
-            <section className="how-it-works-section">
+            <section id="how-it-works" className="how-it-works-section">
                 <div className="section-header">
                     <h2>How It Works</h2>
                     <p>Get started in 3 simple steps</p>
@@ -193,7 +197,7 @@ function LandingPage(){
             </section>
 
             {/* LANGUAGES SECTION */}
-            <section className="languages-section">
+            <section id="languages" className="languages-section">
                 <div className="section-header">
                     <h2>Language Support</h2>
                     <p>Master the languages you need, when you need them</p>
@@ -270,9 +274,9 @@ function LandingPage(){
                     <div className="footer-section">
                         <h4>Platform</h4>
                         <ul>
-                            <li><a href="#features">Features</a></li>
-                            <li><a href="#how-it-works">How It Works</a></li>
-                            <li><a href="#languages">Languages</a></li>
+                            <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollTo("features"); }}>Features</a></li>
+                            <li><a href="#how-it-works" onClick={(e) => { e.preventDefault(); scrollTo("how-it-works"); }}>How It Works</a></li>
+                            <li><a href="#languages" onClick={(e) => { e.preventDefault(); scrollTo("languages"); }}>Languages</a></li>
                         </ul>
                     </div>
                     <div className="footer-section">
