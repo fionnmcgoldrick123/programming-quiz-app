@@ -9,6 +9,7 @@ import QuizPage from './pages/QuizPage';
 import UserPage from './pages/UserPage';
 import CodeSandboxPage from './pages/CodeSandboxPage';
 import AboutPage from './pages/AboutPage';
+import StatsPage from './StatsPage';
 
 function App() {
   return(
