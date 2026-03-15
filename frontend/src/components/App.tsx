@@ -24,6 +24,7 @@ function App() {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/code-sandbox" element={<CodeSandboxPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/stats" element={<StatsPage />} />
         </Routes>
       </AuthProvider>
     </Router>
