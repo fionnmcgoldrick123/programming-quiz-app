@@ -1,6 +1,6 @@
-import '../css-files/Navbar.css'
+import '../../css-files/layout/Navbar.css'
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
+import { useAuth } from "../../utils/AuthContext";
 
 function Navbar(){
 

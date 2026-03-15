@@ -1,10 +1,10 @@
-import '../css-files/PromptPage.css'  
-import Navbar from "./Navbar";
+import '../../css-files/pages/PromptPage.css'  
+import Navbar from "../layout/Navbar";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
-import mcqIcon from "../assets/imgs/test.png";
-import codeIcon from "../assets/imgs/web-development.png";
+import { useAuth } from "../../utils/AuthContext";
+import mcqIcon from "../../assets/imgs/test.png";
+import codeIcon from "../../assets/imgs/web-development.png";
 
 type QuizType = "mcq" | "coding";
 

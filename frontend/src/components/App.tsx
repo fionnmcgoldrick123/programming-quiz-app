@@ -1,14 +1,14 @@
-import PromptPage from './PromptPage'
+import PromptPage from './pages/PromptPage'
 import '../css-files/App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "../utils/AuthContext";
-import LandingPage from './LandingPage';
-import LoginPage from './LoginPage';
-import RegisterPage from './RegisterPage';
-import QuizPage from './QuizPage';
-import UserPage from './UserPage';
-import CodeSandboxPage from './CodeSandboxPage';
-import AboutPage from './AboutPage';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './auth/LoginPage';
+import RegisterPage from './auth/RegisterPage';
+import QuizPage from './pages/QuizPage';
+import UserPage from './pages/UserPage';
+import CodeSandboxPage from './pages/CodeSandboxPage';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   return(

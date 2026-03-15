@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import Navbar from "./Navbar";
+import Navbar from "../layout/Navbar";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
-import '../css-files/LandingPage.css'
+import { useAuth } from "../../utils/AuthContext";
+import '../../css-files/pages/LandingPage.css'
 
 const phrases = [
     "Master coding challenges daily",

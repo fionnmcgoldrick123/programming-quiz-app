@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
-import Navbar from "./Navbar";
-import '../css-files/UserPage.css';
+import { useAuth } from "../../utils/AuthContext";
+import Navbar from "../layout/Navbar";
+import '../../css-files/pages/UserPage.css';
 
 function UserPage() {
     const navigate = useNavigate();

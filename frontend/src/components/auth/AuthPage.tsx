@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
+import { useAuth } from "../../utils/AuthContext";
 import PasswordStrengthBar from "react-password-strength-bar";
-import Navbar from "./Navbar";
-import '../css-files/AuthPage.css';
+import Navbar from "../layout/Navbar";
+import '../../css-files/auth/AuthPage.css';
 
 function AuthPage() {
     const navigate = useNavigate();

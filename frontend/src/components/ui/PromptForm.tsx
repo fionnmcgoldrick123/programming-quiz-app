@@ -1,4 +1,4 @@
-import '../css-files/PromptForm.css'
+import '../../css-files/ui/PromptForm.css'
 import { useState } from 'react'
 // import ClipLoader from "react-spinners/ClipLoader";
 import { useNavigate } from "react-router-dom";

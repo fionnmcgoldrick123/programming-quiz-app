@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
-import '../css-files/AuthPage.css';
+import Navbar from "../layout/Navbar";
+import '../../css-files/auth/AuthPage.css';
 
 interface PasswordReq {
     label: string;

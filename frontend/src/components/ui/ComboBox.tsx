@@ -1,4 +1,4 @@
-import '../css-files/ComboBox.css'
+import '../../css-files/ui/ComboBox.css'
 
 interface ComboBoxProps {
     selectedModel: string;

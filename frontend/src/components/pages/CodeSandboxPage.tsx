@@ -3,10 +3,10 @@ import { useState, useMemo, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Navbar from "./Navbar";
-import { useAuth } from "../utils/AuthContext";
+import Navbar from "../layout/Navbar";
+import { useAuth } from "../../utils/AuthContext";
 
-import '../css-files/CodeSandboxPage.css';
+import '../../css-files/pages/CodeSandboxPage.css';
 
 interface CodeQuestion {
     question: string;
