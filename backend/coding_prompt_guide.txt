@@ -14,7 +14,6 @@ You MUST follow this exact schema:
       "hints": ["string"],
       "time_limit_ms": 1000,
       "memory_limit_kb": 65536,
-      "topic_tags": ["arrays"],
       "avg_cpu_time_ms": 50,
       "avg_memory_kb": 1024,
       "avg_code_lines": 15
@@ -67,11 +66,6 @@ Rules for "memory_limit_kb":
 - Set the memory limit in kilobytes. Typical values: 65536 (64 MB), 262144 (256 MB).
 - Choose based on the data structures required by an optimal solution.
 
-Rules for "topic_tags":
-- Provide an array of applicable topic category strings. Choose ONLY from:
-  ["recursion", "dp", "sorting", "graphs", "trees", "arrays", "strings", "math", "greedy", "binary_search", "hash_map", "stack", "queue", "two_pointers", "sliding_window", "bit_manipulation"]
-- Include all categories that meaningfully apply to this problem.
-
 Rules for "avg_cpu_time_ms":
 - Estimate the average CPU time in milliseconds for a correct, typical solution.
 - Base this on the expected time complexity and typical input sizes from the constraints.
@@ -108,7 +102,6 @@ COMPLETE EXAMPLE (Python Two Sum problem):
       ],
       "time_limit_ms": 1000,
       "memory_limit_kb": 65536,
-      "topic_tags": ["arrays", "hash_map"],
       "avg_cpu_time_ms": 5,
       "avg_memory_kb": 512,
       "avg_code_lines": 8

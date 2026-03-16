@@ -81,10 +81,26 @@ def predict_topic(text: str) -> str:
     # Lazy-load the model on first call
     _load_model()
 
+    print("\n" + "="*80)
+    print("[TAG_PREDICTOR] PREDICTION: STARTING")
+    print("="*80)
+
+    print(f"\n  [STEP 1] Input Text")
+    print(f"    • Length : {len(text)} chars")
+    print(f"    • Preview: \"{text[:100].replace(chr(10), ' ')}{'...' if len(text) > 100 else ''}\"")
+
+    print(f"\n  [STEP 2] Running Model Inference")
     # pipeline.predict expects a list/array of strings, not a bare string.
     # We wrap in a list and unpack the single result.
     prediction = _pipeline.predict([text])
-    return prediction[0]
+    result = prediction[0]
+    print(f"    • Raw prediction: {result}")
+
+    print(f"\n" + "="*80)
+    print(f"[TAG_PREDICTOR] PREDICTION: {result}")
+    print("="*80 + "\n")
+
+    return result
 
 
 def predict_topic_from_parts(title: str, description: str) -> str:
@@ -106,6 +122,9 @@ def predict_topic_from_parts(title: str, description: str) -> str:
     str
         Predicted topic label.
     """
+    print(f"\n  [TAG_PREDICTOR] Input Parts")
+    print(f"    • Title      : {title.strip()[:80]}")
+    print(f"    • Desc length: {len(description.strip())} chars")
     # Replicate the text combination used in load_and_clean() in train.py
     combined = f"{title.strip()}. {description.strip()}"
     return predict_topic(combined)

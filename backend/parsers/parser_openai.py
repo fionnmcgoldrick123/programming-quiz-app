@@ -41,14 +41,9 @@ def openai_parser(response: dict) -> QuizSchema:
 
     # Iterate through each question and create QuizSchema objects. Push to list.
     for q in data["questions"]:
-        # Get topic tags from AI response, or predict them
-        topic_tags = q.get("topic_tags", [])
-        if not topic_tags:
-            topic_tags = predict_tags_for_question(quiz_title, q["question"])
-            print(f"[TAG_SERVICE] MCQ predicted tags: {topic_tags}")
-        else:
-            print(f"[TAG_SERVICE] MCQ tags from AI: {topic_tags}")
-        
+        topic_tags = predict_tags_for_question(quiz_title, q["question"])
+        print(f"[TAG_SERVICE] MCQ predicted tags: {topic_tags}")
+
         questions.append(
             QuizSchema(
                 title=quiz_title,
@@ -90,15 +85,10 @@ def openai_coding_parser(response: dict) -> list[CodingQuestionSchema]:
         test_cases = q.get("test_cases", [])
         computed = compute_coding_metadata(question, starter_code, test_cases)
         
-        # Get topic tags from AI response, or predict them
-        topic_tags = q.get("topic_tags", [])
-        if not topic_tags:
-            question_title = q.get("title", "Coding Challenge")
-            topic_tags = predict_tags_for_question(question_title, question)
-            print(f"[TAG_SERVICE] Coding predicted tags: {topic_tags}")
-        else:
-            print(f"[TAG_SERVICE] Coding tags from AI: {topic_tags}")
-        
+        question_title = q.get("title", "Coding Challenge")
+        topic_tags = predict_tags_for_question(question_title, question)
+        print(f"[TAG_SERVICE] Coding predicted tags: {topic_tags}")
+
         schema = CodingQuestionSchema(
             question=question,
             starter_code=starter_code,

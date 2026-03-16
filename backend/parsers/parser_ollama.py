@@ -47,13 +47,8 @@ def ollama_parser(response: dict) -> list[QuizSchema]:
             opt.split(": ", 1)[1] if ": " in opt else opt for opt in raw_opts
         ]
 
-        # Get topic tags from AI response, or predict them
-        topic_tags = q.get("topic_tags", [])
-        if not topic_tags:
-            topic_tags = predict_tags_for_question(quiz_title, q["question"])
-            print(f"[TAG_SERVICE] MCQ predicted tags: {topic_tags}")
-        else:
-            print(f"[TAG_SERVICE] MCQ tags from AI: {topic_tags}")
+        topic_tags = predict_tags_for_question(quiz_title, q["question"])
+        print(f"[TAG_SERVICE] MCQ predicted tags: {topic_tags}")
 
         questions.append(
             QuizSchema(
@@ -96,16 +91,10 @@ def ollama_coding_parser(response: dict) -> list[CodingQuestionSchema]:
         test_cases = q.get("test_cases", [])
         computed = compute_coding_metadata(question, starter_code, test_cases)
         
-        # Get topic tags from AI response, or predict them
-        topic_tags = q.get("topic_tags", [])
-        if not topic_tags:
-            question_title = q.get("title", "Coding Challenge")
-            topic_tags = predict_tags_for_question(question_title, question)
-            print(f"[TAG_SERVICE] Coding predicted tags: {topic_tags}")
-        else:
-            print(f"[TAG_SERVICE] Coding tags from AI: {topic_tags}")
-            topic_tags = predict_tags_for_question(question_title, question)
-        
+        question_title = q.get("title", "Coding Challenge")
+        topic_tags = predict_tags_for_question(question_title, question)
+        print(f"[TAG_SERVICE] Coding predicted tags: {topic_tags}")
+
         schema = CodingQuestionSchema(
             question=question,
             starter_code=starter_code,
