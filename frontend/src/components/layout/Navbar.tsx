@@ -56,12 +56,6 @@ function Navbar(){
                         disabled={isInActiveQuiz}
                         title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
                     >Prompts</button>
-                    <button
-                        className="nav-button"
-                        onClick={() => !isInActiveQuiz && handleClick('/code-sandbox')}
-                        disabled={isInActiveQuiz}
-                        title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
-                    >Code Sandbox</button>
                 </div>
 
                 <div className="nav-auth-buttons">
