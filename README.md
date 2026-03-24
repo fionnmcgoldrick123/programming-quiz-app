@@ -139,6 +139,41 @@ Once running, switch the active model in the frontend to use the local model ins
 
 ---
 
+## Testing
+
+### Backend Tests
+
+The backend uses pytest for unit and integration tests. Test files are located in `backend/tests/`.
+
+To run the test suite:
+
+```bash
+cd backend
+pytest
+```
+
+To run tests with verbose output:
+
+```bash
+pytest -v
+```
+
+To run a specific test file:
+
+```bash
+pytest tests/test_example.py
+```
+
+To run tests with coverage report:
+
+```bash
+pytest --cov=. --cov-report=html
+```
+
+**Note:** Ensure pytest is installed as a dependency (`pip install pytest`) before running tests.
+
+---
+
 ## API Reference
 
 | Method | Endpoint | Description | Auth Required |
