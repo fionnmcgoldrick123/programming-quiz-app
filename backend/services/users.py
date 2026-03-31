@@ -47,10 +47,8 @@ async def register_user(user_data: RegisterRequest):
     if await user_exists(user_data.email):
         return {"error": "User already exists"}
 
-    # Hash the user's password using bcrypt before storing it
     password_hash_value = hash_password(user_data.password)
 
-    # Connect to the database and use a cursor to execute the insert statement
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -67,7 +65,6 @@ async def register_user(user_data: RegisterRequest):
                 ),
             )
             new_user_id = cur.fetchone()["id"]
-            print(f"New user registered with ID: {new_user_id}")
             return {"message": "User registered successfully", "user_id": new_user_id}
 
 
@@ -97,11 +94,9 @@ async def login_user(login_data: LoginRequest):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # Verify password
     if not verify_password(login_data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # Create JWT token
     token = create_access_token(user["id"], user["email"])
 
     return {
@@ -195,7 +190,7 @@ async def add_user_xp(user_id: int, xp_amount: int):
     """
     with get_connection() as conn:
         with conn.cursor() as cur:
-            # Get current XP and level
+            # Retrieve current XP and level
             cur.execute(
                 """
                 SELECT exp, level
@@ -225,7 +220,7 @@ async def add_user_xp(user_id: int, xp_amount: int):
                 leveled_up = True
                 xp_needed = xp_for_level(new_level)
 
-            # Update user's XP and level in the database
+            # Persist updated XP and level
             cur.execute(
                 """
                 UPDATE users

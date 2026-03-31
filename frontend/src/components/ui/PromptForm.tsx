@@ -1,6 +1,5 @@
 import '../../css-files/ui/PromptForm.css'
 import { useState } from 'react'
-// import ClipLoader from "react-spinners/ClipLoader";
 import { useNavigate } from "react-router-dom";
 
 type QuizType = "mcq" | "coding";
@@ -16,7 +15,6 @@ function PromptForm({ selectedModel, quizType, selectedLanguage }: PromptFormPro
     const [prompt, setPrompt] = useState("")
     const [error, setError] = useState("")
     const navigate = useNavigate()
-    // const [loading, setLoading] = useState(false);
 
     async function handleSubmit(){
         setError("");
@@ -38,7 +36,6 @@ function PromptForm({ selectedModel, quizType, selectedLanguage }: PromptFormPro
 
         const currentPrompt = prompt;
         setPrompt("")
-        // setLoading(true);
 
         let response;
 
@@ -69,8 +66,6 @@ function PromptForm({ selectedModel, quizType, selectedLanguage }: PromptFormPro
             navigate('/quiz', { state: { quizData: quiz, sessionId: Date.now() } });
         }
 
-         // setLoading(false);
-        
     }
 
     return(

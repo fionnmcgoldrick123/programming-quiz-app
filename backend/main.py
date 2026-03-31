@@ -5,14 +5,8 @@ Routes requests to appropriate modules for handling.
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-
-# Import configuration
 from config import CORS_ORIGINS, DEFAULT_MODEL, SUPPORTED_MODELS
-
-# Import authentication
 from core.auth import verify_token
-
-# Import Pydantic models
 from pydantic_models import (
     PromptRequest,
     RegisterRequest,
@@ -25,18 +19,14 @@ from pydantic_models import (
     SaveQuizResultRequest,
 )
 
-# Import service modules
 from services.users import register_user, login_user, get_user_profile, add_user_xp, save_quiz_result, get_user_stats
 from services.ai_models import send_prompt_to_model
 from services.code_executor import run_code, submit_code
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# Global variable for current model
 current_model = DEFAULT_MODEL
 
-# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -96,7 +86,6 @@ async def change_model(model: ModelRequest):
     global current_model
     current_model = model.model
 
-    print(f"Now using {current_model}")
     return {"message": f"now using {current_model}"}
 
 

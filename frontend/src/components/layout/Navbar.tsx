@@ -37,7 +37,7 @@ function Navbar(){
                     return;
                 }
             }
-        } catch { /* ignore parse errors, fall through */ }
+        } catch { /* sessionStorage parse failure — non-critical */ }
         navigate('/prompt');
     }
 

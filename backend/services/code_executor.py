@@ -250,7 +250,7 @@ async def execute_python_test(code: str, input_data: dict, expected):
     Returns:
         dict: Test result with pass/fail status.
     """
-    # Extract function name from code (basic implementation)
+    # Extract function name via regex
     func_match = re.search(r"def\s+(\w+)\s*\(", code)
     if not func_match:
         return {"passed": False, "error": "Could not find function definition in code"}

@@ -261,7 +261,7 @@ function PromptPage(){
                             );
                         }
                     }
-                } catch { /* ignore */ }
+                } catch { /* sessionStorage parse failure — non-critical */ }
                 return null;
             })()}
 

@@ -75,14 +75,11 @@ async def openai_request(prompt: PromptRequest):
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.post(url, headers=headers, json=payload)
 
-    print(response.json())
-
     # Use the appropriate parser based on quiz type
     if is_coding:
         parsed_quiz = openai_coding_parser(response.json())
     else:
         parsed_quiz = openai_parser(response.json())
-    print(f"\n\n\n{parsed_quiz}")
     return parsed_quiz
 
 
@@ -121,10 +118,8 @@ async def llama3_request(prompt: PromptRequest):
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.post(url, headers=headers, json=payload)
 
-    print(response.json())
     if is_coding:
         parsed_quiz = ollama_coding_parser(response.json())
     else:
         parsed_quiz = ollama_parser(response.json())
-    print(f"\n\n\n{parsed_quiz}")
     return parsed_quiz

@@ -18,7 +18,6 @@ def openai_parser(response: dict) -> QuizSchema:
     """
     content = response["choices"][0]["message"]["content"]
 
-    # Attempt to parse the content as JSON
     try:
         data = json.loads(content)
     except json.JSONDecodeError as e:
@@ -39,7 +38,6 @@ def openai_parser(response: dict) -> QuizSchema:
 
     questions = []
 
-    # Iterate through each question and build a list of QuizSchema objects.
     for q in data["questions"]:
         topic_tags = predict_tags_for_question(quiz_title, q["question"])
         print(f"[TAG_SERVICE] MCQ predicted tags: {topic_tags}")

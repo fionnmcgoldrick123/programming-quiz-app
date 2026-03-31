@@ -179,8 +179,8 @@
 .quiz-card {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 12px 14px;
     background-color: #1e1e1e;
     border: 2px solid #3d3d3d;
     border-radius: 12px;
@@ -203,16 +203,17 @@
 }
 
 .quiz-card-icon {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
-    border-radius: 10px;
+    border-radius: 8px;
     flex-shrink: 0;
-    padding: 8px;
+    padding: 6px;
     border: 1px solid #404040;
+    box-sizing: border-box;
 }
 
 .quiz-card-icon img {
@@ -236,22 +237,22 @@
 }
 
 .quiz-card-content h3 {
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #ff9500;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
 }
 
 .quiz-card-content p {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #808080;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .quiz-card-check {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     border: 2px solid #4d4d4d;
     border-radius: 50%;
     display: flex;
@@ -475,21 +476,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
-    max-width: 320px;
+    max-width: 280px;
     margin: 10px auto 0;
-    padding: 18px 40px;
+    padding: 14px 32px;
     background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
     color: #ffffff;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-family: 'Fira Code', monospace;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 24px rgba(255, 149, 0, 0.35);
+    box-shadow: 0 4px 18px rgba(255, 149, 0, 0.3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -606,8 +607,8 @@
     }
 
     .quiz-card-icon {
-        width: 52px;
-        height: 52px;
+        width: 36px;
+        height: 36px;
     }
 }
 
