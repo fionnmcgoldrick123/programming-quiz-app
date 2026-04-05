@@ -75,7 +75,7 @@
 
 .profile-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 580px;
     background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
     border: 2px solid #404040;
     border-radius: 16px;
@@ -117,7 +117,7 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -300,6 +300,70 @@
 }
 
 .stats-page-btn:hover .stats-page-btn__arrow {
+    transform: translateX(3px);
+}
+
+.stat-card--friends {
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.stat-card--friends:hover {
+    border-color: rgba(255, 149, 0, 0.6);
+}
+
+.social-page-btn {
+    width: 100%;
+    padding: 13px 20px;
+    background: transparent;
+    color: #ff9500;
+    border: 1.5px solid rgba(255, 149, 0, 0.5);
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+.social-page-btn:hover {
+    background: rgba(255, 149, 0, 0.08);
+    border-color: #ff9500;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(255, 149, 0, 0.2);
+}
+
+.social-page-btn__icon {
+    font-size: 1rem;
+}
+
+.social-page-btn__badge {
+    background: #ff5555;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+.social-page-btn__arrow {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.social-page-btn:hover .social-page-btn__arrow {
     transform: translateX(3px);
 }
 

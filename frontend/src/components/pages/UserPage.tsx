@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../utils/AuthContext";
 import Navbar from "../layout/Navbar";
@@ -5,7 +6,26 @@ import '../../css-files/pages/UserPage.css';
 
 function UserPage() {
     const navigate = useNavigate();
-    const { user, logout, isAuthenticated, isLoading } = useAuth();
+    const { user, token, logout, isAuthenticated, isLoading } = useAuth();
+    const [friendCount, setFriendCount] = useState<number | null>(null);
+    const [pendingCount, setPendingCount] = useState(0);
+
+    useEffect(() => {
+        if (!token) return;
+        fetch("http://127.0.0.1:8000/friends/count", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setFriendCount(data.friend_count); })
+            .catch(() => {});
+
+        fetch("http://127.0.0.1:8000/friends/requests/count", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setPendingCount(data.pending_count); })
+            .catch(() => {});
+    }, [token]);
 
     if (isLoading) {
         return (
@@ -86,6 +106,14 @@ function UserPage() {
                                 <span className="stat-label">XP to Next Level</span>
                             </div>
                         </div>
+
+                        <div className="stat-card stat-card--friends" onClick={() => navigate("/social")}>
+                            <div className="stat-icon"></div>
+                            <div className="stat-info">
+                                <span className="stat-value">{friendCount ?? "–"}</span>
+                                <span className="stat-label">Friends</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="progress-section">
@@ -122,6 +150,13 @@ function UserPage() {
                             </div>
                         </div>
                     </div>
+
+                    <button className="social-page-btn" onClick={() => navigate("/social")}>
+                        <span className="social-page-btn__icon">👥</span>
+                        Friends & Social
+                        {pendingCount > 0 && <span className="social-page-btn__badge">{pendingCount}</span>}
+                        <span className="social-page-btn__arrow">→</span>
+                    </button>
 
                     <button className="stats-page-btn" onClick={() => navigate("/stats")}>
                         <span className="stats-page-btn__bar"></span>

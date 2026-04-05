@@ -56,6 +56,9 @@ function Navbar(){
                         disabled={isInActiveQuiz}
                         title={isInActiveQuiz ? 'Finish or quit the current quiz first' : undefined}
                     >Prompts</button>
+                    {isAuthenticated && (
+                        <button className="nav-button" onClick={() => handleClick("/social")}>Social</button>
+                    )}
                 </div>
 
                 <div className="nav-auth-buttons">

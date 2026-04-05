@@ -1,0 +1,380 @@
+.social-page {
+    min-height: calc(100vh - 80px);
+    padding: 32px 20px 60px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    font-family: 'Fira Code', monospace;
+    display: flex;
+    justify-content: center;
+}
+
+.social-container {
+    width: 100%;
+    max-width: 720px;
+}
+
+.social-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.social-title {
+    color: #ff9500;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+
+.social-subtitle {
+    color: #808080;
+    font-size: 0.9rem;
+}
+
+/* Tabs */
+.social-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: #222;
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid #333;
+}
+
+.social-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #888;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.social-tab svg {
+    width: 16px;
+    height: 16px;
+}
+
+.social-tab:hover {
+    color: #ccc;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.social-tab--active {
+    background: rgba(255, 149, 0, 0.12);
+    color: #ff9500;
+    border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.social-badge {
+    background: #ff5555;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    margin-left: 4px;
+}
+
+/* Panel */
+.social-panel {
+    background: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 14px;
+    padding: 24px;
+}
+
+/* Search bar */
+.social-search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.social-search-input {
+    flex: 1;
+    padding: 12px 16px;
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.social-search-input:focus {
+    border-color: #ff9500;
+}
+
+.social-search-input::placeholder {
+    color: #666;
+}
+
+.social-search-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.social-search-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+}
+
+.social-search-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading */
+.social-loading,
+.social-loading-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #a0a0a0;
+}
+
+.social-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #404040;
+    border-top-color: #ff9500;
+    border-radius: 50%;
+    animation: socialSpin 1s linear infinite;
+}
+
+@keyframes socialSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.social-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #808080;
+    font-size: 0.95rem;
+}
+
+.social-empty-hint {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.social-empty p {
+    margin: 0 0 4px;
+    color: #a0a0a0;
+    font-size: 1rem;
+}
+
+/* User cards */
+.social-results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.social-user-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.social-user-card:hover {
+    border-color: rgba(255, 149, 0, 0.4);
+    background: rgba(255, 149, 0, 0.04);
+}
+
+.social-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.social-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.social-user-name {
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.social-user-meta {
+    color: #808080;
+    font-size: 0.8rem;
+}
+
+.social-user-arrow {
+    color: #666;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.social-user-card:hover .social-user-arrow {
+    color: #ff9500;
+}
+
+/* Request action buttons */
+.social-request-card {
+    flex-wrap: wrap;
+}
+
+.social-request-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.social-accept-btn,
+.social-reject-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.social-accept-btn {
+    background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
+    color: #fff;
+}
+
+.social-accept-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 12px rgba(255, 149, 0, 0.3);
+}
+
+.social-reject-btn {
+    background: transparent;
+    color: #888;
+    border: 1px solid #555;
+}
+
+.social-reject-btn:hover {
+    border-color: #ff5555;
+    color: #ff5555;
+}
+
+/* Remove friend button */
+.social-remove-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: #888;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.social-remove-btn:hover {
+    border-color: #ff5555;
+    color: #ff5555;
+}
+
+/* Toast notification */
+.social-toast {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 28px;
+    background: #2d2d2d;
+    border: 1px solid #ff9500;
+    border-radius: 10px;
+    color: #ff9500;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    animation: toastIn 0.3s ease;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .social-container {
+        max-width: 100%;
+    }
+
+    .social-tabs {
+        flex-direction: column;
+    }
+
+    .social-search-bar {
+        flex-direction: column;
+    }
+
+    .social-request-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

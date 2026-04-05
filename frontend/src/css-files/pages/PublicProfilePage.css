@@ -1,0 +1,547 @@
+.pub-profile-page {
+    min-height: calc(100vh - 80px);
+    padding: 32px 20px 60px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    font-family: 'Fira Code', monospace;
+    display: flex;
+    justify-content: center;
+}
+
+.pub-container {
+    width: 100%;
+    max-width: 900px;
+}
+
+/* Loading & Error */
+.pub-loading,
+.pub-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    color: #a0a0a0;
+    text-align: center;
+}
+
+.pub-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #404040;
+    border-top-color: #ff9500;
+    border-radius: 50%;
+    animation: pubSpin 1s linear infinite;
+}
+
+@keyframes pubSpin {
+    to { transform: rotate(360deg); }
+}
+
+.pub-btn {
+    margin-top: 16px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #ff9500, #ff7700);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pub-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+}
+
+/* Back button */
+.pub-back-btn {
+    background: transparent;
+    border: 1px solid #404040;
+    color: #aaa;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 24px;
+    display: inline-block;
+}
+
+.pub-back-btn:hover {
+    border-color: #ff9500;
+    color: #ff9500;
+}
+
+/* Toast */
+.pub-toast {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 28px;
+    background: #2d2d2d;
+    border: 1px solid #ff9500;
+    border-radius: 10px;
+    color: #ff9500;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    animation: pubToastIn 0.3s ease;
+}
+
+@keyframes pubToastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Profile Card */
+.pub-profile-card {
+    background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
+    border: 2px solid #404040;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+}
+
+.pub-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 20px rgba(255, 149, 0, 0.4);
+}
+
+.pub-name {
+    color: #fff;
+    font-size: 1.8rem;
+    margin: 0 0 8px;
+}
+
+.pub-email {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+    margin: 0 0 24px;
+}
+
+/* Meta row */
+.pub-meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.pub-meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.pub-meta-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ff9500;
+}
+
+.pub-meta-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Progress */
+.pub-progress-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: left;
+}
+
+.pub-progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #d0d0d0;
+    font-size: 0.85rem;
+}
+
+.pub-progress-bar {
+    height: 8px;
+    background: #404040;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pub-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9500, #ff7700);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Details */
+.pub-details {
+    margin-bottom: 24px;
+}
+
+.pub-detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.pub-detail-label {
+    color: #808080;
+    font-size: 0.85rem;
+}
+
+.pub-detail-value {
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Friend buttons */
+.pub-actions {
+    margin-top: 8px;
+}
+
+.pub-friend-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.pub-friend-btn--add {
+    background: linear-gradient(135deg, #ff9500, #ff7700);
+    color: #fff;
+}
+
+.pub-friend-btn--add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 18px rgba(255, 149, 0, 0.4);
+}
+
+.pub-friend-btn--accept {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: #fff;
+}
+
+.pub-friend-btn--accept:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 18px rgba(76, 175, 80, 0.4);
+}
+
+.pub-friend-btn--pending {
+    background: transparent;
+    border: 1.5px solid #666;
+    color: #888;
+    cursor: default;
+}
+
+.pub-friend-btn--remove {
+    background: transparent;
+    border: 1.5px solid #ff5555;
+    color: #ff5555;
+}
+
+.pub-friend-btn--remove:hover {
+    background: #ff5555;
+    color: #fff;
+}
+
+/* Stats Toggle */
+.pub-stats-toggle {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px 24px;
+    background: transparent;
+    border: 1.5px solid rgba(255, 149, 0, 0.4);
+    border-radius: 12px;
+    color: #ff9500;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pub-stats-toggle:hover {
+    background: rgba(255, 149, 0, 0.06);
+    border-color: #ff9500;
+}
+
+.pub-toggle-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.pub-toggle-arrow--open {
+    transform: rotate(180deg);
+}
+
+/* Stats Section */
+.pub-stats-section {
+    margin-top: 24px;
+    animation: pubFadeIn 0.3s ease;
+}
+
+@keyframes pubFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI */
+.pub-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.pub-kpi-card {
+    background: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    padding: 18px 12px;
+    text-align: center;
+}
+
+.pub-kpi-card--correct {
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.pub-kpi-card--wrong {
+    border-color: rgba(244, 67, 54, 0.3);
+}
+
+.pub-kpi-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ff9500;
+}
+
+.pub-kpi-card--correct .pub-kpi-value { color: #4caf50; }
+.pub-kpi-card--wrong .pub-kpi-value { color: #f44336; }
+
+.pub-kpi-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Charts */
+.pub-charts-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pub-chart-card {
+    background: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.pub-chart-card--wide {
+    grid-column: 1 / -1;
+}
+
+.pub-chart-title {
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 12px;
+    text-align: center;
+}
+
+.pub-chart-wrapper {
+    position: relative;
+}
+
+.pub-chart-wrapper--gauge {
+    position: relative;
+}
+
+.pub-gauge-label {
+    position: absolute;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.pub-gauge-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ff9500;
+}
+
+.pub-pie-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.pub-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Recent Activity */
+.pub-recent {
+    background: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.pub-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pub-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.pub-recent-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.pub-recent-icon--mcq {
+    background: rgba(255, 149, 0, 0.2);
+    color: #ff9500;
+}
+
+.pub-recent-icon--coding {
+    background: rgba(108, 99, 255, 0.2);
+    color: #6c63ff;
+}
+
+.pub-recent-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pub-recent-type {
+    color: #ddd;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.pub-recent-score {
+    color: #888;
+    font-size: 0.78rem;
+}
+
+.pub-recent-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pub-recent-tag {
+    padding: 3px 8px;
+    background: rgba(255, 149, 0, 0.1);
+    border: 1px solid rgba(255, 149, 0, 0.2);
+    border-radius: 6px;
+    color: #ff9500;
+    font-size: 0.7rem;
+}
+
+.pub-recent-date {
+    color: #666;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pub-kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pub-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .pub-meta-row {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pub-profile-card {
+        padding: 24px;
+    }
+
+    .pub-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+
+    .pub-meta-row {
+        flex-wrap: wrap;
+    }
+}

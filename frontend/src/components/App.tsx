@@ -10,6 +10,8 @@ import UserPage from './pages/UserPage';
 import CodeSandboxPage from './pages/CodeSandboxPage';
 import AboutPage from './pages/AboutPage';
 import StatsPage from './StatsPage';
+import SocialPage from './pages/SocialPage';
+import PublicProfilePage from './pages/PublicProfilePage';
 
 function App() {
   return(
@@ -26,6 +28,8 @@ function App() {
           <Route path="/code-sandbox" element={<CodeSandboxPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/stats" element={<StatsPage />} />
+          <Route path="/social" element={<SocialPage />} />
+          <Route path="/user/:userId" element={<PublicProfilePage />} />
         </Routes>
       </AuthProvider>
     </Router>

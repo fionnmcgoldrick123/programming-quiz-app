@@ -18,9 +18,17 @@ from pydantic_models import (
     SubmitCodeRequest,
     McqHintRequest,
     SaveQuizResultRequest,
+    FriendRequestAction,
 )
 
-from services.users import register_user, login_user, get_user_profile, add_user_xp, save_quiz_result, get_user_stats, init_db
+from services.users import (
+    register_user, login_user, get_user_profile, add_user_xp,
+    save_quiz_result, get_user_stats, init_db,
+    search_users, get_public_profile, send_friend_request,
+    respond_to_friend_request, get_friend_requests, get_friends_list,
+    remove_friend, get_friend_count, get_pending_request_count,
+    get_user_stats_public,
+)
 from services.ai_models import send_prompt_to_model
 from services.code_executor import run_code, submit_code
 
@@ -204,3 +212,66 @@ async def submit_code_endpoint(request: SubmitCodeRequest):
         dict: Test results with pass/fail status for each test case.
     """
     return await submit_code(request)
+
+
+# --- Social / Friends Endpoints ---
+
+
+@app.get("/users/search")
+async def search_users_endpoint(q: str, token_data: dict = Depends(verify_token)):
+    """Search for users by name or email."""
+    return await search_users(q, token_data["user_id"])
+
+
+@app.get("/users/{user_id}/profile")
+async def get_user_public_profile(user_id: int, token_data: dict = Depends(verify_token)):
+    """Get another user's public profile with friendship status."""
+    return await get_public_profile(user_id, token_data["user_id"])
+
+
+@app.get("/users/{user_id}/stats")
+async def get_user_public_stats(user_id: int, token_data: dict = Depends(verify_token)):
+    """Get another user's quiz statistics."""
+    return await get_user_stats_public(user_id)
+
+
+@app.post("/friends/request/{addressee_id}")
+async def send_friend_request_endpoint(addressee_id: int, token_data: dict = Depends(verify_token)):
+    """Send a friend request to another user."""
+    return await send_friend_request(token_data["user_id"], addressee_id)
+
+
+@app.post("/friends/respond")
+async def respond_friend_request_endpoint(data: FriendRequestAction, token_data: dict = Depends(verify_token)):
+    """Accept or reject a pending friend request."""
+    return await respond_to_friend_request(token_data["user_id"], data)
+
+
+@app.get("/friends/requests")
+async def get_friend_requests_endpoint(token_data: dict = Depends(verify_token)):
+    """Get all pending friend requests for the authenticated user."""
+    return await get_friend_requests(token_data["user_id"])
+
+
+@app.get("/friends")
+async def get_friends_endpoint(token_data: dict = Depends(verify_token)):
+    """Get the authenticated user's friends list."""
+    return await get_friends_list(token_data["user_id"])
+
+
+@app.delete("/friends/{friend_id}")
+async def remove_friend_endpoint(friend_id: int, token_data: dict = Depends(verify_token)):
+    """Remove a friend."""
+    return await remove_friend(token_data["user_id"], friend_id)
+
+
+@app.get("/friends/count")
+async def friend_count_endpoint(token_data: dict = Depends(verify_token)):
+    """Get the authenticated user's friend count."""
+    return await get_friend_count(token_data["user_id"])
+
+
+@app.get("/friends/requests/count")
+async def pending_request_count_endpoint(token_data: dict = Depends(verify_token)):
+    """Get the count of pending friend requests."""
+    return await get_pending_request_count(token_data["user_id"])

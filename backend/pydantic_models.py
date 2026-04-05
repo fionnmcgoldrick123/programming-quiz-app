@@ -96,3 +96,8 @@ class SaveQuizResultRequest(BaseModel):
     prompt: Optional[str] = None
 
 
+class FriendRequestAction(BaseModel):
+    friendship_id: int
+    action: str  # "accept" or "reject"
+
+

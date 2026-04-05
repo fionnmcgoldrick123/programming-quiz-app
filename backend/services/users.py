@@ -6,7 +6,7 @@ Handles user registration, authentication, profile management, and XP/leveling s
 from fastapi import HTTPException
 from db import get_connection
 from core.auth import hash_password, verify_password, create_access_token
-from pydantic_models import RegisterRequest, LoginRequest, SaveQuizResultRequest
+from pydantic_models import RegisterRequest, LoginRequest, SaveQuizResultRequest, FriendRequestAction
 
 
 async def user_exists(email: str) -> bool:
@@ -304,10 +304,32 @@ def _ensure_quiz_results_table():
             conn.commit()
 
 
+def _ensure_friendships_table():
+    """Create the friendships table if it doesn't exist."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS friendships (
+                    id SERIAL PRIMARY KEY,
+                    requester_id INTEGER NOT NULL REFERENCES users(id),
+                    addressee_id INTEGER NOT NULL REFERENCES users(id),
+                    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT NOW(),
+                    updated_at TIMESTAMP DEFAULT NOW(),
+                    UNIQUE(requester_id, addressee_id),
+                    CHECK (requester_id != addressee_id)
+                );
+                """
+            )
+            conn.commit()
+
+
 def init_db():
     """Initialise all database tables in dependency order."""
     _ensure_users_table()
     _ensure_quiz_results_table()
+    _ensure_friendships_table()
 
 
 async def save_quiz_result(user_id: int, data: SaveQuizResultRequest):
@@ -425,3 +447,324 @@ async def get_user_stats(user_id: int):
         "languages": [{"name": r["language"], "count": r["count"]} for r in lang_rows],
         "recent": recent,
     }
+
+
+async def search_users(query: str, current_user_id: int):
+    """Search users by name or email, excluding the current user."""
+    search_term = f"%{query}%"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, first_name, second_name, email, level, exp, created_at
+                FROM users
+                WHERE id != %s
+                  AND (
+                    LOWER(first_name) LIKE LOWER(%s)
+                    OR LOWER(second_name) LIKE LOWER(%s)
+                    OR LOWER(email) LIKE LOWER(%s)
+                    OR LOWER(first_name || ' ' || second_name) LIKE LOWER(%s)
+                  )
+                ORDER BY first_name, second_name
+                LIMIT 20;
+                """,
+                (current_user_id, search_term, search_term, search_term, search_term),
+            )
+            users = cur.fetchall()
+
+    return [
+        {
+            "id": u["id"],
+            "first_name": u["first_name"],
+            "second_name": u["second_name"],
+            "email": u["email"],
+            "level": u["level"],
+            "exp": u["exp"],
+            "created_at": u["created_at"].isoformat() if u["created_at"] else None,
+        }
+        for u in users
+    ]
+
+
+async def get_public_profile(target_user_id: int, current_user_id: int):
+    """Get a user's public profile with friendship status."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, first_name, second_name, email, level, exp, created_at
+                FROM users
+                WHERE id = %s;
+                """,
+                (target_user_id,),
+            )
+            user = cur.fetchone()
+
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # Check friendship status between current user and target
+            cur.execute(
+                """
+                SELECT id, requester_id, addressee_id, status
+                FROM friendships
+                WHERE (requester_id = %s AND addressee_id = %s)
+                   OR (requester_id = %s AND addressee_id = %s)
+                LIMIT 1;
+                """,
+                (current_user_id, target_user_id, target_user_id, current_user_id),
+            )
+            friendship = cur.fetchone()
+
+            # Count friends for the target user
+            cur.execute(
+                """
+                SELECT COUNT(*) AS count
+                FROM friendships
+                WHERE status = 'accepted'
+                  AND (requester_id = %s OR addressee_id = %s);
+                """,
+                (target_user_id, target_user_id),
+            )
+            friend_count = cur.fetchone()["count"]
+
+    friendship_status = "none"
+    if friendship:
+        if friendship["status"] == "accepted":
+            friendship_status = "friends"
+        elif friendship["status"] == "pending":
+            if friendship["requester_id"] == current_user_id:
+                friendship_status = "request_sent"
+            else:
+                friendship_status = "request_received"
+
+    return {
+        "id": user["id"],
+        "first_name": user["first_name"],
+        "second_name": user["second_name"],
+        "email": user["email"],
+        "level": user["level"],
+        "exp": user["exp"],
+        "xp_required": xp_for_level(user["level"]),
+        "created_at": user["created_at"].isoformat() if user["created_at"] else None,
+        "friendship_status": friendship_status,
+        "friend_count": friend_count,
+    }
+
+
+async def send_friend_request(requester_id: int, addressee_id: int):
+    """Send a friend request from requester to addressee."""
+    if requester_id == addressee_id:
+        raise HTTPException(status_code=400, detail="Cannot send friend request to yourself")
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            # Check if target user exists
+            cur.execute("SELECT id FROM users WHERE id = %s;", (addressee_id,))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # Check for existing friendship/request in either direction
+            cur.execute(
+                """
+                SELECT id, status, requester_id
+                FROM friendships
+                WHERE (requester_id = %s AND addressee_id = %s)
+                   OR (requester_id = %s AND addressee_id = %s);
+                """,
+                (requester_id, addressee_id, addressee_id, requester_id),
+            )
+            existing = cur.fetchone()
+
+            if existing:
+                if existing["status"] == "accepted":
+                    raise HTTPException(status_code=400, detail="Already friends")
+                if existing["status"] == "pending":
+                    if existing["requester_id"] == requester_id:
+                        raise HTTPException(status_code=400, detail="Friend request already sent")
+                    # The other person already sent us a request — auto-accept
+                    cur.execute(
+                        """
+                        UPDATE friendships
+                        SET status = 'accepted', updated_at = NOW()
+                        WHERE id = %s;
+                        """,
+                        (existing["id"],),
+                    )
+                    conn.commit()
+                    return {"message": "Friend request accepted (they had already requested you)"}
+
+            cur.execute(
+                """
+                INSERT INTO friendships (requester_id, addressee_id, status)
+                VALUES (%s, %s, 'pending');
+                """,
+                (requester_id, addressee_id),
+            )
+            conn.commit()
+
+    return {"message": "Friend request sent"}
+
+
+async def respond_to_friend_request(user_id: int, data: FriendRequestAction):
+    """Accept or reject a pending friend request."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, requester_id, addressee_id, status
+                FROM friendships
+                WHERE id = %s AND addressee_id = %s AND status = 'pending';
+                """,
+                (data.friendship_id, user_id),
+            )
+            friendship = cur.fetchone()
+
+            if not friendship:
+                raise HTTPException(status_code=404, detail="Friend request not found")
+
+            if data.action == "accept":
+                cur.execute(
+                    "UPDATE friendships SET status = 'accepted', updated_at = NOW() WHERE id = %s;",
+                    (friendship["id"],),
+                )
+                conn.commit()
+                return {"message": "Friend request accepted"}
+            elif data.action == "reject":
+                cur.execute("DELETE FROM friendships WHERE id = %s;", (friendship["id"],))
+                conn.commit()
+                return {"message": "Friend request rejected"}
+            else:
+                raise HTTPException(status_code=400, detail="Action must be 'accept' or 'reject'")
+
+
+async def get_friend_requests(user_id: int):
+    """Get pending friend requests received by the user."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT f.id AS friendship_id, f.created_at,
+                       u.id AS user_id, u.first_name, u.second_name, u.email, u.level, u.exp
+                FROM friendships f
+                JOIN users u ON u.id = f.requester_id
+                WHERE f.addressee_id = %s AND f.status = 'pending'
+                ORDER BY f.created_at DESC;
+                """,
+                (user_id,),
+            )
+            rows = cur.fetchall()
+
+    return [
+        {
+            "friendship_id": r["friendship_id"],
+            "user_id": r["user_id"],
+            "first_name": r["first_name"],
+            "second_name": r["second_name"],
+            "email": r["email"],
+            "level": r["level"],
+            "exp": r["exp"],
+            "sent_at": r["created_at"].isoformat() if r["created_at"] else None,
+        }
+        for r in rows
+    ]
+
+
+async def get_friends_list(user_id: int):
+    """Get all accepted friends for a user."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT u.id, u.first_name, u.second_name, u.email, u.level, u.exp, u.created_at,
+                       f.created_at AS friends_since
+                FROM friendships f
+                JOIN users u ON (
+                    CASE WHEN f.requester_id = %s THEN u.id = f.addressee_id
+                         ELSE u.id = f.requester_id END
+                )
+                WHERE f.status = 'accepted'
+                  AND (f.requester_id = %s OR f.addressee_id = %s)
+                ORDER BY u.first_name, u.second_name;
+                """,
+                (user_id, user_id, user_id),
+            )
+            rows = cur.fetchall()
+
+    return [
+        {
+            "id": r["id"],
+            "first_name": r["first_name"],
+            "second_name": r["second_name"],
+            "email": r["email"],
+            "level": r["level"],
+            "exp": r["exp"],
+            "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+            "friends_since": r["friends_since"].isoformat() if r["friends_since"] else None,
+        }
+        for r in rows
+    ]
+
+
+async def remove_friend(user_id: int, friend_id: int):
+    """Remove a friendship between two users."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                DELETE FROM friendships
+                WHERE status = 'accepted'
+                  AND ((requester_id = %s AND addressee_id = %s)
+                    OR (requester_id = %s AND addressee_id = %s));
+                """,
+                (user_id, friend_id, friend_id, user_id),
+            )
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Friendship not found")
+            conn.commit()
+
+    return {"message": "Friend removed"}
+
+
+async def get_friend_count(user_id: int):
+    """Get the number of accepted friends for a user."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COUNT(*) AS count
+                FROM friendships
+                WHERE status = 'accepted'
+                  AND (requester_id = %s OR addressee_id = %s);
+                """,
+                (user_id, user_id),
+            )
+            return {"friend_count": cur.fetchone()["count"]}
+
+
+async def get_pending_request_count(user_id: int):
+    """Get the number of pending friend requests for the user."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COUNT(*) AS count
+                FROM friendships
+                WHERE addressee_id = %s AND status = 'pending';
+                """,
+                (user_id,),
+            )
+            return {"pending_count": cur.fetchone()["count"]}
+
+
+async def get_user_stats_public(user_id: int):
+    """Public version of user stats for viewing other users' profiles."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM users WHERE id = %s;", (user_id,)
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="User not found")
+
+    return await get_user_stats(user_id)
