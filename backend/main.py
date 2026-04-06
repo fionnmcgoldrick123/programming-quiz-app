@@ -231,8 +231,8 @@ async def get_user_public_profile(user_id: int, token_data: dict = Depends(verif
 
 @app.get("/users/{user_id}/stats")
 async def get_user_public_stats(user_id: int, token_data: dict = Depends(verify_token)):
-    """Get another user's quiz statistics."""
-    return await get_user_stats_public(user_id)
+    """Get another user's quiz statistics (friends only)."""
+    return await get_user_stats_public(user_id, token_data["user_id"])
 
 
 @app.post("/friends/request/{addressee_id}")

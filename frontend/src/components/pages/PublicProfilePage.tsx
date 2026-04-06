@@ -203,7 +203,9 @@ function PublicProfilePage() {
                             {profile.second_name.charAt(0).toUpperCase()}
                         </div>
                         <h1 className="pub-name">{profile.first_name} {profile.second_name}</h1>
-                        <p className="pub-email">{profile.email}</p>
+                        {profile.friendship_status === "friends" && (
+                            <p className="pub-email">{profile.email}</p>
+                        )}
 
                         <div className="pub-meta-row">
                             <div className="pub-meta-item">
@@ -230,20 +232,27 @@ function PublicProfilePage() {
                             </div>
                         </div>
 
-                        <div className="pub-details">
-                            <div className="pub-detail-item">
-                                <span className="pub-detail-label">Member Since</span>
-                                <span className="pub-detail-value">{formatDate(profile.created_at)}</span>
+                        {profile.friendship_status === "friends" ? (
+                            <div className="pub-details">
+                                <div className="pub-detail-item">
+                                    <span className="pub-detail-label">Member Since</span>
+                                    <span className="pub-detail-value">{formatDate(profile.created_at)}</span>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="pub-details pub-details--locked">
+                                <span className="pub-locked-icon">🔒</span>
+                                <span className="pub-locked-text">Add as friend to see full details &amp; stats</span>
+                            </div>
+                        )}
 
                         <div className="pub-actions">
                             {friendBtn()}
                         </div>
                     </div>
 
-                    {/* Stats Toggle */}
-                    {stats && stats.total_quizzes > 0 && (
+                    {/* Stats Toggle — friends only */}
+                    {profile.friendship_status === "friends" && stats && stats.total_quizzes > 0 && (
                         <>
                             <button
                                 className="pub-stats-toggle"

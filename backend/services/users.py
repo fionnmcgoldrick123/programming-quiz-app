@@ -757,14 +757,27 @@ async def get_pending_request_count(user_id: int):
             return {"pending_count": cur.fetchone()["count"]}
 
 
-async def get_user_stats_public(user_id: int):
-    """Public version of user stats for viewing other users' profiles."""
+async def get_user_stats_public(user_id: int, current_user_id: int):
+    """Return stats for a user — only accessible by accepted friends."""
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id FROM users WHERE id = %s;", (user_id,)
-            )
+            cur.execute("SELECT id FROM users WHERE id = %s;", (user_id,))
             if not cur.fetchone():
                 raise HTTPException(status_code=404, detail="User not found")
+
+            cur.execute(
+                """
+                SELECT 1 FROM friendships
+                WHERE status = 'accepted'
+                  AND ((requester_id = %s AND addressee_id = %s)
+                    OR (requester_id = %s AND addressee_id = %s));
+                """,
+                (current_user_id, user_id, user_id, current_user_id),
+            )
+            if not cur.fetchone():
+                raise HTTPException(
+                    status_code=403,
+                    detail="You must be friends to view this user's statistics",
+                )
 
     return await get_user_stats(user_id)

@@ -200,6 +200,28 @@
     margin-bottom: 24px;
 }
 
+.pub-details--locked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px dashed #404040;
+}
+
+.pub-locked-icon {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.pub-locked-text {
+    color: #808080;
+    font-size: 0.82rem;
+    font-style: italic;
+}
+
 .pub-detail-item {
     display: flex;
     justify-content: space-between;
