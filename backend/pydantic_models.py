@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 
@@ -94,6 +94,45 @@ class SaveQuizResultRequest(BaseModel):
     tags: List[str] = []
     language: Optional[str] = None
     prompt: Optional[str] = None
+
+
+class FriendRequestAction(BaseModel):
+    friendship_id: int
+
+
+class UpdateProfileRequest(BaseModel):
+    display_name: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+    @field_validator("display_name")
+    @classmethod
+    def validate_display_name(cls, v):
+        if v is None:
+            return v
+        v = v.strip()
+        if len(v) < 3 or len(v) > 30:
+            raise ValueError("Display name must be between 3 and 30 characters")
+        return v
+
+    @field_validator("bio")
+    @classmethod
+    def validate_bio(cls, v):
+        if v is None:
+            return v
+        if len(v) > 300:
+            raise ValueError("Bio must be 300 characters or fewer")
+        return v
+
+    @field_validator("avatar_url")
+    @classmethod
+    def validate_avatar_url(cls, v):
+        if v is None:
+            return v
+        # Max 5MB base64 string (roughly 5mil chars)
+        if len(v) > 5_000_000:
+            raise ValueError("Image too large (max 5 MB)")
+        return v
 
 
 class FriendRequestAction(BaseModel):
