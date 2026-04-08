@@ -76,22 +76,46 @@ function UserPage() {
             setSaveError("Bio must be 300 characters or fewer");
             return;
         }
+
+        // Check avatar size before sending
+        if (editAvatarData && editAvatarData.length > 5_000_000) {
+            setSaveError("Image is too large. Please use a smaller image (max 2 MB).");
+            return;
+        }
+
         setSaving(true);
         try {
-            const body: Record<string, string> = {};
-            if (displayNameTrimmed) body.display_name = displayNameTrimmed;
-            else if (user?.display_name) body.display_name = "";  // clear by sending empty isn't supported; skip if empty
-            body.bio = editBio;
-            if (editAvatarData) body.avatar_url = editAvatarData;
+            const body: Record<string, any> = {};
+            
+            // Only send display_name if it changed
+            if (displayNameTrimmed !== (user?.display_name ?? "")) {
+                if (displayNameTrimmed) {
+                    body.display_name = displayNameTrimmed;
+                }
+            }
+            
+            // Only send bio if it changed
+            if (editBio !== (user?.bio ?? "")) {
+                body.bio = editBio;
+            }
+            
+            // Only send avatar if it was actually updated
+            if (editAvatarData) {
+                body.avatar_url = editAvatarData;
+            }
 
-            // If display name is empty, remove it so we don't send a too-short value
-            if (!body.display_name) delete body.display_name;
+            // If nothing changed, just close the modal
+            if (Object.keys(body).length === 0) {
+                setEditOpen(false);
+                return;
+            }
 
             const res = await fetch("http://127.0.0.1:8000/me/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(body),
             });
+            
             if (res.ok) {
                 const updated = await res.json();
                 updateUser(updated);
@@ -99,9 +123,12 @@ function UserPage() {
                 setTimeout(() => { setEditOpen(false); setSaveSuccess(false); }, 1200);
             } else {
                 const err = await res.json();
-                setSaveError(err.detail ?? "Failed to save");
+                const detail = err.detail || err.message || "Failed to save";
+                console.error("Save error:", err);
+                setSaveError(detail);
             }
-        } catch {
+        } catch (error) {
+            console.error("Save exception:", error);
             setSaveError("Network error");
         } finally {
             setSaving(false);

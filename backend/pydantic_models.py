@@ -123,6 +123,20 @@ class UpdateProfileRequest(BaseModel):
         if len(v) > 300:
             raise ValueError("Bio must be 300 characters or fewer")
         return v
+
+    @field_validator("avatar_url")
+    @classmethod
+    def validate_avatar_url(cls, v):
+        if v is None:
+            return v
+        # Max 5MB base64 string (roughly 5mil chars)
+        if len(v) > 5_000_000:
+            raise ValueError("Image too large (max 5 MB)")
+        return v
+
+
+class FriendRequestAction(BaseModel):
+    friendship_id: int
     action: str  # "accept" or "reject"
 
 

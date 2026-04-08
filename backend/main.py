@@ -4,7 +4,7 @@ Routes requests to appropriate modules for handling.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import CORS_ORIGINS, DEFAULT_MODEL, SUPPORTED_MODELS
 from core.auth import verify_token
@@ -154,7 +154,10 @@ async def get_current_user(token_data: dict = Depends(verify_token)):
 @app.patch("/me/profile")
 async def update_profile(data: UpdateProfileRequest, token_data: dict = Depends(verify_token)):
     """Update the authenticated user's display name, bio, and/or avatar."""
-    return await update_user_profile(token_data["user_id"], data)
+    try:
+        return await update_user_profile(token_data["user_id"], data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # --- User XP Endpoints ---
