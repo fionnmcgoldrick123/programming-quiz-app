@@ -92,14 +92,14 @@ function QuizPage() {
                 quizPrompt,
             }));
         }
-    }, [sessionId, quiz, currentIndex, finished, totalXpEarned, QUIZ_SESSION_KEY]);
+    }, [sessionId, quiz, currentIndex, finished, totalXpEarned, QUIZ_SESSION_KEY, quizPrompt]);
 
     useEffect(() => {
         setAnswered(false);
         setSelectedAnswer(null);
         setCorrectAnswerIndex(null);
         clearHints();
-    }, [currentIndex]);
+    }, [currentIndex, clearHints]);
 
     // Save quiz result to backend when finished
     useEffect(() => {
@@ -116,7 +116,7 @@ function QuizPage() {
                 prompt: quizPrompt || undefined,
             }),
         }).catch(err => console.error('Error saving quiz result:', err));
-    }, [finished]);  // eslint-disable-line react-hooks/exhaustive-deps
+    }, [finished, token, quiz, quizPrompt]);
 
     async function addXpToUser() {
         if (!token) return;

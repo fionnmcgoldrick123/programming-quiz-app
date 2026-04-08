@@ -135,7 +135,7 @@ function CodeSandboxPage() {
                 prompt: quizPrompt || undefined,
             }),
         }).catch(err => console.error('Error saving quiz result:', err));
-    }, [finished]);  // eslint-disable-line react-hooks/exhaustive-deps
+    }, [finished, token, questions, language, quizPrompt]);
 
     // Persist session to sessionStorage whenever progress changes
     useEffect(() => {

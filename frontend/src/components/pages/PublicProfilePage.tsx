@@ -77,7 +77,7 @@ function PublicProfilePage() {
         }
 
         fetchProfile();
-    }, [authLoading, isAuthenticated, token, userId]);
+    }, [authLoading, isAuthenticated, token, userId, currentUser, navigate]);
 
     async function fetchProfile() {
         setLoading(true);
