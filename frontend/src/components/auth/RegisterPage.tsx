@@ -104,7 +104,15 @@ function RegisterPage() {
             });
 
             if (response.ok) {
-                navigate("/login", { state: { registered: true } });
+                const data = await response.json();
+                navigate("/login", {
+                    state: {
+                        registered: true,
+                        verificationSent: data.verification_email_sent,
+                        verificationLink: data.verification_link,
+                        verificationNote: data.verification_note,
+                    }
+                });
             } else {
                 const data = await response.json();
                 setError(data.detail || "Registration failed");

@@ -9,11 +9,12 @@ function LoginPage() {
     const location = useLocation();
     const { login } = useAuth();
 
-    const registeredSuccessfully = !!(location.state as { registered?: boolean })?.registered;
+    const loginState = location.state as { registered?: boolean; verificationSent?: boolean; verificationLink?: string; verificationNote?: string } | null;
+    const registeredSuccessfully = !!loginState?.registered;
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [message, setMessage] = useState(registeredSuccessfully ? "Account created! Please sign in." : "");
+    const [message, setMessage] = useState(registeredSuccessfully ? "Account created! Please verify your email before logging in." : "");
     const [isSuccess, setIsSuccess] = useState(registeredSuccessfully);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -69,6 +70,18 @@ function LoginPage() {
                         {message && (
                             <div className={`error-message ${isSuccess ? 'success-message' : ''}`}>
                                 {message}
+                                {loginState?.verificationLink && (
+                                    <div style={{ marginTop: "10px" }}>
+                                        <button
+                                            type="button"
+                                            className="switch-link"
+                                            onClick={() => window.open(loginState.verificationLink, "_blank", "noopener,noreferrer")}
+                                            style={{ background: "none", border: "none", padding: 0 }}
+                                        >
+                                            Open the verification link
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 

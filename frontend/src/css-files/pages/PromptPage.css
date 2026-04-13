@@ -182,18 +182,20 @@
 .quiz-card {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 18px;
     height: auto;
-    min-height: 40px;
+    min-height: 72px;
+    width: min(100%, 320px);
     background-color: #1e1e1e;
     border: 2px solid #3d3d3d;
-    border-radius: 8px;
+    border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     box-sizing: border-box;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .quiz-card:hover {
@@ -210,13 +212,13 @@
 }
 
 .quiz-card-icon {
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #2d2d2d 0%, #333333 100%);
-    border-radius: 4px;
+    border-radius: 12px;
     flex-shrink: 0;
     border: 1px solid #404040;
     box-sizing: border-box;
@@ -239,25 +241,30 @@
 }
 
 .quiz-card-content {
-    flex: 0;
+    flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 4px;
 }
 
 .quiz-card-content h3 {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #ff9500;
     margin: 0;
 }
 
 .quiz-card-content p {
-    display: none;
+    display: block;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #9a9a9a;
 }
 
 .quiz-card-check {
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
     border: 2px solid #4d4d4d;
     border-radius: 50%;
     display: flex;
@@ -273,10 +280,10 @@
 }
 
 .checkmark {
-    width: 8px;
-    height: 5px;
-    border-left: 1.5px solid #1a1a1a;
-    border-bottom: 1.5px solid #1a1a1a;
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid #1a1a1a;
+    border-bottom: 2px solid #1a1a1a;
     transform: rotate(-45deg);
 }
 
@@ -551,13 +558,13 @@
     }
 
     .quiz-type-cards {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .quiz-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px;
+        width: 100%;
+        text-align: left;
     }
 
     .quiz-card-content h3 {
@@ -565,9 +572,7 @@
     }
 
     .quiz-card-check {
-        position: absolute;
-        top: 12px;
-        right: 12px;
+        align-self: center;
     }
 
     .config-row {
@@ -611,8 +616,8 @@
     }
 
     .quiz-card-icon {
-        width: 36px;
-        height: 36px;
+        width: 42px;
+        height: 42px;
     }
 }
 

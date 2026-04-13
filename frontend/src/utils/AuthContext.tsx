@@ -13,6 +13,8 @@ interface User {
     display_name: string | null;
     bio: string | null;
     avatar_url: string | null;
+    email_verified?: boolean;
+    verified_at?: string | null;
     created_at: string | null;
     updated_at: string | null;
 }

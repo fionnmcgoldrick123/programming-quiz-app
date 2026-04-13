@@ -3,9 +3,25 @@ User management module.
 Handles user registration, authentication, profile management, and XP/leveling system.
 """
 
+from datetime import datetime
+from email.message import EmailMessage
+import secrets
+import smtplib
+import ssl
+from urllib.parse import quote
+
 from fastapi import HTTPException
 from db import get_connection
 from core.auth import hash_password, verify_password, create_access_token
+from config import (
+    APP_BASE_URL,
+    SMTP_FROM,
+    SMTP_HOST,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_USERNAME,
+    SMTP_USE_TLS,
+)
 from pydantic_models import RegisterRequest, LoginRequest, SaveQuizResultRequest, FriendRequestAction, UpdateProfileRequest
 
 
@@ -19,6 +35,8 @@ async def user_exists(email: str) -> bool:
     Returns:
         bool: True if the user exists, False otherwise.
     """
+    normalized_email = email.strip().lower()
+
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -28,9 +46,42 @@ async def user_exists(email: str) -> bool:
                 WHERE email = %s
                 LIMIT 1;
                 """,
-                (email,),
+                (normalized_email,),
             )
             return cur.fetchone() is not None
+
+
+def _build_verification_link(token: str) -> str:
+    return f"{APP_BASE_URL.rstrip('/')}/verify-email?token={quote(token)}"
+
+
+def _send_verification_email(email: str, full_name: str, verification_link: str) -> bool:
+    if not SMTP_HOST or not SMTP_FROM or not SMTP_USERNAME or not SMTP_PASSWORD:
+        return False
+
+    message = EmailMessage()
+    message["Subject"] = "Verify your CodeQuiz account"
+    message["From"] = SMTP_FROM
+    message["To"] = email
+    message.set_content(
+        f"""Hello {full_name},
+
+Please verify your CodeQuiz account by opening this link:
+
+{verification_link}
+
+If you did not create this account, you can ignore this email.
+"""
+    )
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
+        if SMTP_USE_TLS:
+            server.starttls(context=context)
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.send_message(message)
+
+    return True
 
 
 async def register_user(user_data: RegisterRequest):
@@ -44,28 +95,57 @@ async def register_user(user_data: RegisterRequest):
         dict: A success message or an error if the user already exists.
     """
     # Check if user already exists
-    if await user_exists(user_data.email):
+    normalized_email = user_data.email.strip().lower()
+
+    if await user_exists(normalized_email):
         return {"error": "User already exists"}
 
     password_hash_value = hash_password(user_data.password)
+    verification_token = secrets.token_urlsafe(32)
+    verification_link = _build_verification_link(verification_token)
+    verification_sent_at = datetime.utcnow()
 
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO users(first_name, second_name, email, password_hash)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO users(first_name, second_name, email, password_hash, email_verified, verification_token, verification_sent_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
                 """,
                 (
                     user_data.first_name,
                     user_data.second_name,
-                    user_data.email,
+                    normalized_email,
                     password_hash_value,
+                    False,
+                    verification_token,
+                    verification_sent_at,
                 ),
             )
             new_user_id = cur.fetchone()["id"]
-            return {"message": "User registered successfully", "user_id": new_user_id}
+
+            email_sent = False
+            try:
+                email_sent = _send_verification_email(
+                    normalized_email,
+                    f"{user_data.first_name} {user_data.second_name}".strip(),
+                    verification_link,
+                )
+            except Exception:
+                email_sent = False
+
+            conn.commit()
+
+            response = {
+                "message": "User registered successfully. Please verify your email before logging in.",
+                "user_id": new_user_id,
+                "verification_email_sent": email_sent,
+            }
+            if not email_sent:
+                response["verification_link"] = verification_link
+                response["verification_note"] = "SMTP is not configured, so the verification link is returned for local development."
+            return response
 
 
 async def login_user(login_data: LoginRequest):
@@ -78,17 +158,20 @@ async def login_user(login_data: LoginRequest):
     Returns:
         dict: JWT token and user data or an error message.
     """
+    normalized_email = login_data.email.strip().lower()
+
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 SELECT id, first_name, second_name, email, password_hash, exp, level,
-                       display_name, bio, avatar_url, created_at, updated_at
+                       display_name, bio, avatar_url, created_at, updated_at,
+                       email_verified, verified_at
                 FROM users
                 WHERE email = %s
                 LIMIT 1;
                 """,
-                (login_data.email,),
+                (normalized_email,),
             )
             user = cur.fetchone()
 
@@ -97,6 +180,9 @@ async def login_user(login_data: LoginRequest):
 
     if not verify_password(login_data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not user.get("email_verified"):
+        raise HTTPException(status_code=403, detail="Please verify your email address before logging in")
 
     token = create_access_token(user["id"], user["email"])
 
@@ -113,6 +199,8 @@ async def login_user(login_data: LoginRequest):
             "display_name": user["display_name"],
             "bio": user["bio"],
             "avatar_url": user["avatar_url"],
+            "email_verified": user.get("email_verified", False),
+            "verified_at": user["verified_at"].isoformat() if user.get("verified_at") else None,
             "created_at": (
                 user["created_at"].isoformat() if user["created_at"] else None
             ),
@@ -140,8 +228,9 @@ async def get_user_profile(user_id: int):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, first_name, second_name, email, exp, level,
-                       display_name, bio, avatar_url, created_at, updated_at
+                  SELECT id, first_name, second_name, email, exp, level,
+                      display_name, bio, avatar_url, created_at, updated_at,
+                      email_verified, verified_at
                 FROM users
                 WHERE id = %s
                 LIMIT 1;
@@ -164,8 +253,44 @@ async def get_user_profile(user_id: int):
         "display_name": user["display_name"],
         "bio": user["bio"],
         "avatar_url": user["avatar_url"],
+        "email_verified": user.get("email_verified", False),
+        "verified_at": user["verified_at"].isoformat() if user.get("verified_at") else None,
         "created_at": user["created_at"].isoformat() if user["created_at"] else None,
         "updated_at": user["updated_at"].isoformat() if user["updated_at"] else None,
+    }
+
+
+async def verify_user_email(token: str):
+    """Mark a user's email as verified from a verification token."""
+    if not token:
+        raise HTTPException(status_code=400, detail="Verification token is required")
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE users
+                SET email_verified = TRUE,
+                    verification_token = NULL,
+                    verification_sent_at = NULL,
+                    verified_at = NOW(),
+                    updated_at = NOW()
+                WHERE verification_token = %s
+                  AND email_verified = FALSE
+                  AND verification_sent_at > NOW() - INTERVAL '24 hours'
+                RETURNING id, email;
+                """,
+                (token,),
+            )
+            user = cur.fetchone()
+            if not user:
+                raise HTTPException(status_code=400, detail="Invalid or expired verification link")
+            conn.commit()
+
+    return {
+        "message": "Email verified successfully",
+        "user_id": user["id"],
+        "email": user["email"],
     }
 
 
@@ -328,6 +453,10 @@ def _ensure_users_table():
                     display_name VARCHAR(30) DEFAULT NULL,
                     bio VARCHAR(300) DEFAULT NULL,
                     avatar_url TEXT DEFAULT NULL,
+                    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+                    verification_token TEXT DEFAULT NULL,
+                    verification_sent_at TIMESTAMP DEFAULT NULL,
+                    verified_at TIMESTAMP DEFAULT NULL,
                     created_at TIMESTAMP DEFAULT NOW(),
                     updated_at TIMESTAMP DEFAULT NOW()
                 );
@@ -337,6 +466,11 @@ def _ensure_users_table():
             cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(30) DEFAULT NULL;")
             cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(300) DEFAULT NULL;")
             cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT NULL;")
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;")
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token TEXT DEFAULT NULL;")
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_sent_at TIMESTAMP DEFAULT NULL;")
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP DEFAULT NULL;")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);")
             conn.commit()
 
 

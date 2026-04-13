@@ -28,7 +28,7 @@ from services.users import (
     search_users, get_public_profile, send_friend_request,
     respond_to_friend_request, get_friend_requests, get_friends_list,
     remove_friend, get_friend_count, get_pending_request_count,
-    get_user_stats_public, update_user_profile,
+    get_user_stats_public, update_user_profile, verify_user_email,
 )
 from services.ai_models import send_prompt_to_model
 from services.code_executor import run_code, submit_code
@@ -121,6 +121,12 @@ async def register(user_data: RegisterRequest):
         dict: Success message or error.
     """
     return await register_user(user_data)
+
+
+@app.get("/verify-email")
+async def verify_email(token: str):
+    """Verify a user's email address using the token sent by email."""
+    return await verify_user_email(token)
 
 
 @app.post("/login")

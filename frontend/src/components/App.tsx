@@ -5,6 +5,7 @@ import { AuthProvider } from "../utils/AuthContext";
 import LandingPage from './pages/LandingPage';
 import LoginPage from './auth/LoginPage';
 import RegisterPage from './auth/RegisterPage';
+import VerifyEmailPage from './auth/VerifyEmailPage';
 import QuizPage from './pages/QuizPage';
 import UserPage from './pages/UserPage';
 import CodeSandboxPage from './pages/CodeSandboxPage';
@@ -23,6 +24,7 @@ function App() {
           <Route path="/prompt" element = {<PromptPage />} />
           <Route path="/login" element = {<LoginPage />} />
           <Route path="/register" element = {<RegisterPage />} />
+          <Route path="/verify-email" element = {<VerifyEmailPage />} />
           <Route path="/profile" element = {<UserPage/>} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/code-sandbox" element={<CodeSandboxPage />} />
