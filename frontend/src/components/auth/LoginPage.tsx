@@ -69,7 +69,10 @@ function LoginPage() {
 
                         {message && (
                             <div className={`error-message ${isSuccess ? 'success-message' : ''}`}>
-                                {message}
+                                <div>{message}</div>
+                                {loginState?.verificationNote && (
+                                    <div style={{ marginTop: "8px" }}>{loginState.verificationNote}</div>
+                                )}
                                 {loginState?.verificationLink && (
                                     <div style={{ marginTop: "10px" }}>
                                         <button

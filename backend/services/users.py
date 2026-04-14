@@ -126,6 +126,7 @@ async def register_user(user_data: RegisterRequest):
             new_user_id = cur.fetchone()["id"]
 
             email_sent = False
+            verification_note = "Please verify your email before logging in."
             try:
                 email_sent = _send_verification_email(
                     normalized_email,
@@ -134,6 +135,10 @@ async def register_user(user_data: RegisterRequest):
                 )
             except Exception:
                 email_sent = False
+                verification_note = (
+                    "We could not deliver the verification email automatically. "
+                    "Use the verification link below, or check your email settings."
+                )
 
             conn.commit()
 
@@ -141,10 +146,9 @@ async def register_user(user_data: RegisterRequest):
                 "message": "User registered successfully. Please verify your email before logging in.",
                 "user_id": new_user_id,
                 "verification_email_sent": email_sent,
+                "verification_link": verification_link,
+                "verification_note": verification_note,
             }
-            if not email_sent:
-                response["verification_link"] = verification_link
-                response["verification_note"] = "SMTP is not configured, so the verification link is returned for local development."
             return response
 
 
