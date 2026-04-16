@@ -298,6 +298,75 @@ async def verify_user_email(token: str):
     }
 
 
+async def resend_verification_email(email: str):
+    """Resend the verification email to a user who hasn't verified yet."""
+    normalized_email = email.strip().lower()
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, first_name, second_name, email, email_verified, verification_token, verification_sent_at
+                FROM users
+                WHERE email = %s
+                LIMIT 1;
+                """,
+                (normalized_email,),
+            )
+            user = cur.fetchone()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.get("email_verified"):
+        raise HTTPException(status_code=400, detail="This email is already verified")
+
+    # Generate a new verification token
+    verification_token = secrets.token_urlsafe(32)
+    verification_link = _build_verification_link(verification_token)
+    verification_sent_at = datetime.utcnow()
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE users
+                SET verification_token = %s,
+                    verification_sent_at = %s,
+                    updated_at = NOW()
+                WHERE email = %s
+                RETURNING id;
+                """,
+                (verification_token, verification_sent_at, normalized_email),
+            )
+            updated_user = cur.fetchone()
+            conn.commit()
+
+    email_sent = False
+    verification_note = "Please check your email for the verification link."
+    try:
+        email_sent = _send_verification_email(
+            normalized_email,
+            f"{user['first_name']} {user['second_name']}".strip(),
+            verification_link,
+        )
+    except Exception:
+        email_sent = False
+        verification_note = (
+            "We could not deliver the verification email automatically. "
+            "Use the verification link below, or check your email settings."
+        )
+
+    return {
+        "message": "Verification email sent successfully",
+        "user_id": updated_user["id"],
+        "email": normalized_email,
+        "verification_email_sent": email_sent,
+        "verification_link": verification_link,
+        "verification_note": verification_note,
+    }
+
+
 async def update_user_profile(user_id: int, data: UpdateProfileRequest):
     """Update a user's display name, bio, and/or avatar."""
     fields = []

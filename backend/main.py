@@ -13,6 +13,7 @@ from pydantic_models import (
     RegisterRequest,
     ModelRequest,
     LoginRequest,
+    EmailRequest,
     AddXpRequest,
     RunCodeRequest,
     SubmitCodeRequest,
@@ -29,6 +30,7 @@ from services.users import (
     respond_to_friend_request, get_friend_requests, get_friends_list,
     remove_friend, get_friend_count, get_pending_request_count,
     get_user_stats_public, update_user_profile, verify_user_email,
+    resend_verification_email,
 )
 from services.ai_models import send_prompt_to_model
 from services.code_executor import run_code, submit_code
@@ -127,6 +129,12 @@ async def register(user_data: RegisterRequest):
 async def verify_email(token: str):
     """Verify a user's email address using the token sent by email."""
     return await verify_user_email(token)
+
+
+@app.post("/resend-verification")
+async def resend_verification(request: EmailRequest):
+    """Resend a verification email to a user who hasn't verified their email yet."""
+    return await resend_verification_email(request.email)
 
 
 @app.post("/login")

@@ -56,6 +56,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class EmailRequest(BaseModel):
+    email: str
+
+
 class UserResponse(BaseModel):
     id: int
     first_name: str

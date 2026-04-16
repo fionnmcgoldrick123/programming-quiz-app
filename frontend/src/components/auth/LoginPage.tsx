@@ -17,6 +17,8 @@ function LoginPage() {
     const [message, setMessage] = useState(registeredSuccessfully ? "Account created! Please verify your email before logging in." : "");
     const [isSuccess, setIsSuccess] = useState(registeredSuccessfully);
     const [isLoading, setIsLoading] = useState(false);
+    const [isResending, setIsResending] = useState(false);
+    const [lastFailedEmail, setLastFailedEmail] = useState("");
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -36,10 +38,45 @@ function LoginPage() {
             navigate("/");
         } else {
             setMessage(result.error || "Login failed");
+            setLastFailedEmail(email);
         }
 
         setIsLoading(false);
     }
+
+    async function handleResendVerification() {
+        if (!lastFailedEmail) return;
+
+        setIsResending(true);
+        try {
+            const response = await fetch('http://127.0.0.1:8000/resend-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: lastFailedEmail })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setMessage(`Verification email sent to ${lastFailedEmail}. Please check your inbox.`);
+                setIsSuccess(true);
+            } else {
+                const errorData = await response.json();
+                setMessage(errorData.detail || 'Failed to resend verification email');
+                setIsSuccess(false);
+            }
+        } catch (error) {
+            console.error('Error resending verification email:', error);
+            setMessage('Network error. Please try again.');
+            setIsSuccess(false);
+        } finally {
+            setIsResending(false);
+        }
+    }
+
+    const isVerificationError = message.toLowerCase().includes('verify');
+    const showResendButton = isVerificationError && lastFailedEmail;
 
     return (
         <>
@@ -85,6 +122,19 @@ function LoginPage() {
                                         </button>
                                     </div>
                                 )}
+                                {showResendButton && (
+                                    <div style={{ marginTop: "10px" }}>
+                                        <button
+                                            type="button"
+                                            className="switch-link"
+                                            onClick={handleResendVerification}
+                                            disabled={isResending}
+                                            style={{ background: "none", border: "none", padding: 0 }}
+                                        >
+                                            {isResending ? 'Sending...' : 'Resend verification email'}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -96,7 +146,7 @@ function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="your.email@example.com"
-                                    disabled={isLoading}
+                                    disabled={isLoading || isResending}
                                 />
                             </div>
 
@@ -107,11 +157,11 @@ function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter your password"
-                                    disabled={isLoading}
+                                    disabled={isLoading || isResending}
                                 />
                             </div>
 
-                            <button type="submit" className="submit-button" disabled={isLoading}>
+                            <button type="submit" className="submit-button" disabled={isLoading || isResending}>
                                 {isLoading ? 'Signing in...' : 'Sign In'}
                             </button>
                         </form>
