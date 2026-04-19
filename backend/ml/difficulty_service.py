@@ -196,6 +196,9 @@ def predict_difficulty_for_question(q) -> str:
 
         # ── Step 4: Build feature row ──────────────────────────────────────────
         print(f"\n  [STEP 4] Building Feature Row for Inference")
+        import numpy as _np
+        _tl = time_limit if time_limit else 1
+        _ml = memory_limit if memory_limit else 1
         row = pd.DataFrame([{
             "avg_cpu_time":             avg_cpu_time,
             "avg_memory":               avg_memory,
@@ -218,8 +221,23 @@ def predict_difficulty_for_question(q) -> str:
             "has_complexity_keywords":  desc_feats["has_complexity_keywords"],
             "num_large_numbers":        desc_feats["num_large_numbers"],
             "num_code_tokens":          desc_feats["num_code_tokens"],
+            # New description features
+            "avg_word_length":          desc_feats.get("avg_word_length", 0.0),
+            "num_sentences":            desc_feats.get("num_sentences", 1),
+            "max_constraint_magnitude": desc_feats.get("max_constraint_magnitude", 0.0),
+            "num_variables":            desc_feats.get("num_variables", 0),
+            "keyword_complexity_score": desc_feats.get("keyword_complexity_score", 0),
+            # Ratio features
+            "cpu_time_ratio":           avg_cpu_time / _tl,
+            "memory_ratio":             avg_memory / _ml,
+            # Log features
+            "log_cpu_time":             _np.log1p(avg_cpu_time),
+            "log_memory":               _np.log1p(avg_memory),
+            "log_code_size":            _np.log1p(avg_code_size),
+            # Interaction features
             "desc_words_x_large_nums":  desc_feats["desc_word_count"] * desc_feats["num_large_numbers"],
             "cpu_time_x_code_size":     avg_cpu_time * avg_code_size,
+            "keyword_x_constraint_mag": desc_feats.get("keyword_complexity_score", 0) * desc_feats.get("max_constraint_magnitude", 0.0),
             "description_text":         desc_feats["description_text"],
         }])
         print(f"     Feature row created ({row.shape[0]} row × {row.shape[1]} features)")

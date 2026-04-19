@@ -89,12 +89,13 @@ async def send_prompt(prompt: PromptRequest):
 
 
 @app.post("/model")
-async def change_model(model: ModelRequest):
+async def change_model(model: ModelRequest, token_data: dict = Depends(verify_token)):
     """
-    Change the currently active AI model.
+    Change the currently active AI model (authenticated users only).
 
     Args:
         model (ModelRequest): The model selection request.
+        token_data (dict): The decoded JWT token data (ensures authentication).
 
     Returns:
         dict: Confirmation message or error.

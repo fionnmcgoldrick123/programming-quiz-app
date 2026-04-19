@@ -151,7 +151,7 @@ function CodeSandboxPage() {
                 quizPrompt,
             }));
         }
-    }, [sessionId, questions, language, currentIndex, code, finished, CODE_SESSION_KEY]);
+    }, [sessionId, questions, language, currentIndex, code, finished, quizPrompt, CODE_SESSION_KEY]);
 
     const languageMap: { [key: string]: string } = {
         "python": "python",

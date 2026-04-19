@@ -58,7 +58,7 @@ function LoginPage() {
             });
 
             if (response.ok) {
-                const data = await response.json();
+                await response.json();
                 setMessage(`Verification email sent to ${lastFailedEmail}. Please check your inbox.`);
                 setIsSuccess(true);
             } else {

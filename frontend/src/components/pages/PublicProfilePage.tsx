@@ -80,7 +80,7 @@ function PublicProfilePage() {
         }
 
         fetchProfile();
-    }, [authLoading, isAuthenticated, token, userId, currentUser, navigate]);
+    }, [authLoading, isAuthenticated, token, userId, currentUser, navigate, fetchProfile]);
 
     async function fetchProfile() {
         setLoading(true);

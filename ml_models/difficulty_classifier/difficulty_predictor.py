@@ -28,7 +28,7 @@ import seaborn as sns
 import joblib
 from html.parser import HTMLParser
 
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -121,6 +121,25 @@ _GREEDY_KW    = ["greedy", "interval", "schedule", "activity selection", "minimu
 _STACK_KW     = ["stack", "queue", "deque", "monotonic", "bracket", "parenthes", "balanced"]
 _COMPLEXITY_KW = ["o(n)", "o(n^2)", "o(log n)", "o(n log n)", "o(1)", "time complexity", "space complexity", "complexity"]
 
+_ALL_KW_LISTS = [
+    _RECURSION_KW, _DP_KW, _GRAPH_KW, _SORT_KW, _SEARCH_KW,
+    _STRING_KW, _MATH_KW, _GREEDY_KW, _STACK_KW, _COMPLEXITY_KW,
+]
+
+
+def _max_constraint_magnitude(text: str) -> float:
+    """Return the log10 of the largest numeric value found in text (constraint indicator)."""
+    magnitudes = []
+    # Patterns like 10^9, 10^5
+    for m in re.findall(r'10\s*[\^]\s*(\d+)', text):
+        magnitudes.append(float(m))
+    # Plain numbers
+    for m in re.findall(r'\b(\d+)\b', text):
+        val = int(m)
+        if val > 1:
+            magnitudes.append(float(np.log10(float(val))))
+    return max(magnitudes) if magnitudes else 0.0
+
 
 def extract_description_features(html: str) -> dict:
     """
@@ -163,6 +182,13 @@ def extract_description_features(html: str) -> dict:
         "has_complexity_keywords":  int(any(w in text_lower for w in _COMPLEXITY_KW)),
         "num_large_numbers":        large_numbers,
         "num_code_tokens":          code_tokens,
+        "avg_word_length":          np.mean([len(w) for w in text.split()]) if text.split() else 0.0,
+        "num_sentences":            max(len(re.findall(r'[.!?]+', text)), 1),
+        "max_constraint_magnitude": _max_constraint_magnitude(text),
+        "num_variables":            len(re.findall(r'\b[A-Z]\b', text)),
+        "keyword_complexity_score": sum(
+            int(any(w in text_lower for w in kw_list)) for kw_list in _ALL_KW_LISTS
+        ),
         "description_text":         text,
     }
 
@@ -239,6 +265,8 @@ _DESC_REQUIRED_COLS = {
     "has_string_keywords", "has_math_keywords", "has_greedy_keywords",
     "has_stack_keywords", "has_complexity_keywords",
     "num_large_numbers", "num_code_tokens",
+    "avg_word_length", "num_sentences", "max_constraint_magnitude",
+    "num_variables", "keyword_complexity_score",
 }
 
 
@@ -290,7 +318,15 @@ def _parse_descriptions(codenet_path: str, problem_ids: list[str]) -> pd.DataFra
                 "num_sample_inputs": 0, "has_constraints": 0,
                 "has_recursion_keywords": 0, "has_dp_keywords": 0,
                 "has_graph_keywords": 0, "has_sort_keywords": 0,
-                "has_search_keywords": 0, "description_text": "",
+                "has_search_keywords": 0,
+                "has_string_keywords": 0, "has_math_keywords": 0,
+                "has_greedy_keywords": 0, "has_stack_keywords": 0,
+                "has_complexity_keywords": 0,
+                "num_large_numbers": 0, "num_code_tokens": 0,
+                "avg_word_length": 0.0, "num_sentences": 1,
+                "max_constraint_magnitude": 0.0, "num_variables": 0,
+                "keyword_complexity_score": 0,
+                "description_text": "",
             })
             continue
 
@@ -340,9 +376,17 @@ NUMERIC_FEATURES = [
     "has_string_keywords", "has_math_keywords", "has_greedy_keywords",
     "has_stack_keywords", "has_complexity_keywords",
     "num_large_numbers", "num_code_tokens",
+    # New description features
+    "avg_word_length", "num_sentences", "max_constraint_magnitude",
+    "num_variables", "keyword_complexity_score",
+    # Ratio features (normalised resource usage)
+    "cpu_time_ratio", "memory_ratio",
+    # Log-transformed features (handle skewed distributions)
+    "log_cpu_time", "log_memory", "log_code_size",
     # Interaction features
     "desc_words_x_large_nums",  # long problem + big constraints = harder
     "cpu_time_x_code_size",     # slow + verbose = harder
+    "keyword_x_constraint_mag", # many topics + large constraints = harder
 ]
 TEXT_FEATURE = "description_text"
 
@@ -350,8 +394,17 @@ TEXT_FEATURE = "description_text"
 def _add_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add derived interaction columns in-place."""
     df = df.copy()
-    df["desc_words_x_large_nums"] = df["desc_word_count"] * df["num_large_numbers"]
-    df["cpu_time_x_code_size"]    = df["avg_cpu_time"].fillna(0) * df["avg_code_size"].fillna(0)
+    # Ratio features: what fraction of the limit does the solution use?
+    df["cpu_time_ratio"] = df["avg_cpu_time"].fillna(0) / df["time_limit"].replace(0, 1).fillna(1)
+    df["memory_ratio"]   = df["avg_memory"].fillna(0)   / df["memory_limit"].replace(0, 1).fillna(1)
+    # Log transforms for skewed numeric features
+    df["log_cpu_time"]  = np.log1p(df["avg_cpu_time"].fillna(0))
+    df["log_memory"]    = np.log1p(df["avg_memory"].fillna(0))
+    df["log_code_size"] = np.log1p(df["avg_code_size"].fillna(0))
+    # Interaction features
+    df["desc_words_x_large_nums"]  = df["desc_word_count"] * df["num_large_numbers"]
+    df["cpu_time_x_code_size"]     = df["avg_cpu_time"].fillna(0) * df["avg_code_size"].fillna(0)
+    df["keyword_x_constraint_mag"] = df["keyword_complexity_score"] * df["max_constraint_magnitude"]
     return df
 
 
@@ -379,14 +432,14 @@ def _build_preprocessor() -> ColumnTransformer:
         ("scaler",  StandardScaler()),
     ])
 
-    # Word n-gram TF-IDF (semantics)
+    # Word n-gram TF-IDF (semantics) — increased capacity + trigrams
     word_tfidf = TfidfVectorizer(
-        max_features=1000, stop_words="english",
-        ngram_range=(1, 2), sublinear_tf=True, min_df=2,
+        max_features=3000, stop_words="english",
+        ngram_range=(1, 3), sublinear_tf=True, min_df=2,
     )
     # Char n-gram TF-IDF (catches code tokens, variable names, operators)
     char_tfidf = TfidfVectorizer(
-        max_features=500, analyzer="char_wb",
+        max_features=1000, analyzer="char_wb",
         ngram_range=(3, 5), sublinear_tf=True, min_df=2,
     )
     text_pipe = Pipeline([
@@ -406,40 +459,44 @@ def _define_models() -> dict:
     """Return {name: (estimator, param_grid)} for all models to compare."""
     models = {
         "Random Forest": (
-            RandomForestClassifier(random_state=42),
+            RandomForestClassifier(random_state=42, class_weight="balanced"),
             {
-                "classifier__n_estimators": [100, 200],
-                "classifier__max_depth":    [10, 20, None],
+                "classifier__n_estimators": [200, 400, 600],
+                "classifier__max_depth":    [15, 25, None],
+                "classifier__min_samples_leaf": [1, 2, 4],
             },
         ),
         # HistGradientBoosting: faster, handles NaNs natively, better on large data
         "HistGradientBoosting": (
             HistGradientBoostingClassifier(random_state=42),
             {
-                "classifier__max_iter":      [100, 200],
-                "classifier__learning_rate": [0.05, 0.1],
-                "classifier__max_depth":     [3, 5, None],
+                "classifier__max_iter":      [200, 400, 600],
+                "classifier__learning_rate": [0.03, 0.05, 0.1],
+                "classifier__max_depth":     [4, 6, 8, None],
+                "classifier__min_samples_leaf": [5, 10, 20],
+                "classifier__l2_regularization": [0.0, 0.1, 1.0],
             },
         ),
         "Gradient Boosting": (
             GradientBoostingClassifier(random_state=42),
             {
-                "classifier__n_estimators":   [100, 200],
-                "classifier__learning_rate":  [0.05, 0.1],
-                "classifier__max_depth":      [3, 5],
+                "classifier__n_estimators":   [200, 400],
+                "classifier__learning_rate":  [0.03, 0.05, 0.1],
+                "classifier__max_depth":      [3, 5, 7],
+                "classifier__subsample":      [0.8, 1.0],
             },
         ),
         "Linear SVM": (
-            SVC(kernel="linear", random_state=42, probability=True),
-            {"classifier__C": [0.01, 0.1, 1, 10]},
+            SVC(kernel="linear", random_state=42, probability=True, class_weight="balanced"),
+            {"classifier__C": [0.01, 0.1, 1, 10, 50]},
         ),
         "Logistic Regression": (
-            LogisticRegression(max_iter=1000, random_state=42),
-            {"classifier__C": [0.01, 0.1, 1, 10]},
+            LogisticRegression(max_iter=2000, random_state=42, class_weight="balanced"),
+            {"classifier__C": [0.01, 0.1, 1, 10, 50]},
         ),
         "kNN": (
             KNeighborsClassifier(),
-            {"classifier__n_neighbors": [3, 5, 7, 11]},
+            {"classifier__n_neighbors": [3, 5, 7, 11, 15]},
         ),
     }
 
@@ -447,11 +504,17 @@ def _define_models() -> dict:
         models["XGBoost"] = (
             XGBClassifier(
                 random_state=42, eval_metric="mlogloss", verbosity=0,
+                tree_method="hist",
             ),
             {
-                "classifier__n_estimators":  [100, 200],
-                "classifier__learning_rate": [0.05, 0.1],
-                "classifier__max_depth":     [3, 6],
+                "classifier__n_estimators":  [200, 400, 600],
+                "classifier__learning_rate": [0.03, 0.05, 0.1],
+                "classifier__max_depth":     [4, 6, 8],
+                "classifier__subsample":     [0.7, 0.8, 1.0],
+                "classifier__colsample_bytree": [0.7, 0.8, 1.0],
+                "classifier__reg_alpha":     [0, 0.1, 1.0],
+                "classifier__reg_lambda":    [1.0, 2.0, 5.0],
+                "classifier__min_child_weight": [1, 3, 5],
             },
         )
 
@@ -579,9 +642,10 @@ def main() -> None:
         val_acc_default = pipe.score(X_val, y_val)
         print(f"  Default  →  train: {train_acc:.4f}  |  val: {val_acc_default:.4f}")
 
-        # GridSearchCV with 5-fold CV — f1_macro balances precision/recall across all 3 classes
-        grid = GridSearchCV(
-            pipe, param_grid, cv=5, n_jobs=-1, scoring="f1_macro", verbose=0
+        # RandomizedSearchCV with 5-fold CV — f1_macro balances precision/recall across all 3 classes
+        grid = RandomizedSearchCV(
+            pipe, param_grid, n_iter=40, cv=5, n_jobs=-1,
+            scoring="f1_macro", verbose=0, random_state=42,
         )
         grid.fit(X_train, y_train)
 
@@ -743,6 +807,12 @@ def predict_difficulty(
     le    = model_bundle["label_encoder"]
     desc_feats = extract_description_features(f"<p>{description_text}</p>")
 
+    _cpu  = avg_cpu_time or 0
+    _mem  = avg_memory or 0
+    _code = avg_code_size or 0
+    _tl   = time_limit if time_limit else 1
+    _ml   = memory_limit if memory_limit else 1
+
     row = pd.DataFrame([{
         "avg_cpu_time":             avg_cpu_time,
         "avg_memory":               avg_memory,
@@ -765,9 +835,23 @@ def predict_difficulty(
         "has_complexity_keywords":  desc_feats["has_complexity_keywords"],
         "num_large_numbers":        desc_feats["num_large_numbers"],
         "num_code_tokens":          desc_feats["num_code_tokens"],
+        # New description features
+        "avg_word_length":          desc_feats["avg_word_length"],
+        "num_sentences":            desc_feats["num_sentences"],
+        "max_constraint_magnitude": desc_feats["max_constraint_magnitude"],
+        "num_variables":            desc_feats["num_variables"],
+        "keyword_complexity_score": desc_feats["keyword_complexity_score"],
+        # Ratio features
+        "cpu_time_ratio":           _cpu / _tl,
+        "memory_ratio":             _mem / _ml,
+        # Log features
+        "log_cpu_time":             np.log1p(_cpu),
+        "log_memory":               np.log1p(_mem),
+        "log_code_size":            np.log1p(_code),
         # Interaction features
         "desc_words_x_large_nums":  desc_feats["desc_word_count"] * desc_feats["num_large_numbers"],
-        "cpu_time_x_code_size":     (avg_cpu_time or 0) * (avg_code_size or 0),
+        "cpu_time_x_code_size":     _cpu * _code,
+        "keyword_x_constraint_mag": desc_feats["keyword_complexity_score"] * desc_feats["max_constraint_magnitude"],
         "description_text":         desc_feats["description_text"],
     }])
 

@@ -63,13 +63,13 @@ function SocialPage() {
         if (authLoading) return;
         if (!isAuthenticated || !token) { navigate("/login"); return; }
         fetchRequestCount();
-    }, [authLoading, isAuthenticated, token, navigate]);
+    }, [authLoading, isAuthenticated, token, navigate, fetchRequestCount]);
 
     useEffect(() => {
         if (!token) return;
         if (activeTab === "friends") fetchFriends();
         if (activeTab === "requests") fetchRequests();
-    }, [activeTab, token]);
+    }, [activeTab, token, fetchFriends, fetchRequests]);
 
     const headers = { Authorization: `Bearer ${token}` };
 

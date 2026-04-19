@@ -85,7 +85,7 @@ function UserPage() {
 
         setSaving(true);
         try {
-            const body: Record<string, any> = {};
+            const body: Record<string, string> = {};
             
             // Only send display_name if it changed
             if (displayNameTrimmed !== (user?.display_name ?? "")) {
