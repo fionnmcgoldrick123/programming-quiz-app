@@ -33,9 +33,9 @@ class PromptRequest(BaseModel):
     @field_validator('language')
     @classmethod
     def validate_language(cls, v):
-        if v is not None and v.lower() not in SUPPORTED_LANGUAGES:
+        if v is not None and v != "" and v.lower() not in SUPPORTED_LANGUAGES:
             raise ValueError(f'language must be one of: {", ".join(sorted(SUPPORTED_LANGUAGES))}')
-        return v
+        return v or None
     
     @field_validator('topic')
     @classmethod

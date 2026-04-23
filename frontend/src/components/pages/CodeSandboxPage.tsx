@@ -53,9 +53,9 @@ interface QuestionStat {
 }
 
 const XP_PER_DIFFICULTY: Record<string, number> = {
-    easy: 30,
-    medium: 60,
-    hard: 100,
+    easy: 75,
+    medium: 150,
+    hard: 250,
 };
 
 const codeSessionKey = (userId: number) => `codeSandboxSession_${userId}`;
@@ -63,7 +63,7 @@ const codeSessionKey = (userId: number) => `codeSandboxSession_${userId}`;
 function CodeSandboxPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { user, token, updateUser } = useAuth();
 
 
     const CODE_SESSION_KEY = user ? codeSessionKey(user.id) : null;
@@ -374,6 +374,24 @@ function CodeSandboxPage() {
                     solvedCode: code,
                     xpEarned: earned,
                 };
+
+                // Persist XP to backend and update auth context so profile bar reflects it live
+                // Awaited so reward popup only shows after XP is confirmed assigned
+                if (token) {
+                    try {
+                        const xpRes = await fetch('http://127.0.0.1:8000/add-xp', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ xp_amount: earned }),
+                        });
+                        if (xpRes.ok) {
+                            const data = await xpRes.json();
+                            const { xp_gained: _xg, leveled_up: _lu, new_level: _nl, ...updatedUser } = data;
+                            updateUser(updatedUser);
+                        }
+                    } catch { /* silently ignore network errors */ }
+                }
+
                 setQuestionStats(prev => {
                     const updated = [...prev];
                     updated[currentIndex] = stat;
@@ -442,7 +460,7 @@ function CodeSandboxPage() {
             ? Math.round(questionStats.reduce((s, q) => s + (q?.timeSec ?? 0), 0) / questionStats.length)
             : 0;
 
-        const barData = questions.map((_, i) => ({
+        const barData = questions.map((_q, i) => ({
             name: `Q${i + 1}`,
             xp: questionStats[i]?.xpEarned ?? 0,
             attempts: questionStats[i]?.attempts ?? 0,
@@ -595,7 +613,7 @@ function CodeSandboxPage() {
                                         itemStyle={{ color: "#e0e0e0" }}
                                     />
                                     <Bar dataKey="xp" radius={[6, 6, 0, 0]}>
-                                        {barData.map((entry, i) => (
+                                        {barData.map((entry: { xp: number; attempts: number; solved: number }, i) => (
                                             <Cell key={i} fill={entry.solved ? "#ff9500" : "#3d3d3d"} />
                                         ))}
                                     </Bar>
@@ -616,7 +634,7 @@ function CodeSandboxPage() {
                                         itemStyle={{ color: "#e0e0e0" }}
                                     />
                                     <Bar dataKey="attempts" radius={[6, 6, 0, 0]}>
-                                        {barData.map((entry, i) => (
+                                        {barData.map((entry: { xp: number; attempts: number; solved: number }, i) => (
                                             <Cell key={i} fill={entry.attempts === 0 ? "#2ecc71" : entry.attempts <= 2 ? "#f39c12" : "#e74c3c"} />
                                         ))}
                                     </Bar>
@@ -750,6 +768,7 @@ function CodeSandboxPage() {
 
                     <div className="sandbox-editor-wrapper">
                         <Editor
+                            key={currentIndex}
                             height="100%"
                             language={languageMap[language.toLowerCase()] || "javascript"}
                             value={code}
@@ -911,18 +930,6 @@ function CodeSandboxPage() {
                                 ))}
                             </div>
                         )}
-
-                        {currentQ.hints && currentQ.hints.length > 0 && (
-                            <div className="sandbox-hints">
-                                <h3 className="sandbox-section-title">Hints</h3>
-                                <ul>
-                                    {currentQ.hints.map((hint, idx) => (
-                                        <li key={idx}>{hint}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
 
                     </div>
                 </div>

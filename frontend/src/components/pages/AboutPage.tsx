@@ -86,8 +86,7 @@ function AboutPage() {
                             <p>
                                 Choose your programming language, describe the topic you want to focus on,
                                 pick the number of questions, and select a difficulty range. The platform
-                                supports over 12 languages including Python, JavaScript, TypeScript, Java,
-                                C++, C#, Go, Rust, Ruby, and PHP.
+                                supports 5 languages: Python, JavaScript, TypeScript, Java, and C#.
                             </p>
                         </div>
 

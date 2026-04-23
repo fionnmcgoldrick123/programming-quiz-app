@@ -36,12 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Clear storage on app boot to ensure no user is logged in initially
+    // Restore auth state from localStorage on page load (survives refresh)
     useEffect(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setToken(null);
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        if (storedToken && storedUser) {
+            try {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
+            } catch {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+            }
+        }
         setIsLoading(false);
     }, []);
 

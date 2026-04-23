@@ -80,7 +80,8 @@ function PublicProfilePage() {
         }
 
         fetchProfile();
-    }, [authLoading, isAuthenticated, token, userId, currentUser, navigate, fetchProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authLoading, isAuthenticated, token, userId, currentUser, navigate]);
 
     async function fetchProfile() {
         setLoading(true);

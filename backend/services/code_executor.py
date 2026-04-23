@@ -594,6 +594,14 @@ async def execute_java(code: str):
         if compile_result.returncode != 0:
             return {"success": False, "output": "", "error": compile_result.stderr}
 
+        has_main = bool(re.search(r"public\s+static\s+void\s+main\s*\(\s*String", code))
+        if not has_main:
+            return {
+                "success": True,
+                "output": "✓ Compiled successfully. (No main() method — add one to see output.)",
+                "error": None,
+            }
+
         run_result = subprocess.run(
             ["java", "-cp", temp_dir, class_name],
             capture_output=True, text=True, timeout=10,
@@ -748,8 +756,30 @@ def _python_to_csharp_literal(val) -> str:
 
 async def execute_csharp(code: str):
     """Execute C# code by creating a temp dotnet project and running it."""
+    has_main = bool(
+        re.search(r"static\s+(?:async\s+)?(?:void|Task|int)\s+Main\s*\(", code)
+    )
     temp_dir = tempfile.mkdtemp()
     try:
+        if not has_main:
+            # No entry point — compile as library so dotnet build doesn't require Main
+            lib_csproj = _CSHARP_CSPROJ.replace("<OutputType>Exe</OutputType>", "<OutputType>Library</OutputType>")
+            with open(os.path.join(temp_dir, "Program.csproj"), "w", encoding="utf-8") as f:
+                f.write(lib_csproj)
+            with open(os.path.join(temp_dir, "Program.cs"), "w", encoding="utf-8") as f:
+                f.write(code)
+            build_result = subprocess.run(
+                ["dotnet", "build", temp_dir, "--nologo", "-v", "q"],
+                capture_output=True, text=True, timeout=60,
+            )
+            if build_result.returncode == 0:
+                return {
+                    "success": True,
+                    "output": "✓ Compiled successfully. (No Main() method — add one to see output.)",
+                    "error": None,
+                }
+            return {"success": False, "output": "", "error": build_result.stdout + build_result.stderr}
+
         with open(os.path.join(temp_dir, "Program.csproj"), "w", encoding="utf-8") as f:
             f.write(_CSHARP_CSPROJ)
         with open(os.path.join(temp_dir, "Program.cs"), "w", encoding="utf-8") as f:

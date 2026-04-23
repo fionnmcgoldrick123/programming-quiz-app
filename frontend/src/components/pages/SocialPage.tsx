@@ -63,13 +63,15 @@ function SocialPage() {
         if (authLoading) return;
         if (!isAuthenticated || !token) { navigate("/login"); return; }
         fetchRequestCount();
-    }, [authLoading, isAuthenticated, token, navigate, fetchRequestCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authLoading, isAuthenticated, token, navigate]);
 
     useEffect(() => {
         if (!token) return;
         if (activeTab === "friends") fetchFriends();
         if (activeTab === "requests") fetchRequests();
-    }, [activeTab, token, fetchFriends, fetchRequests]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab, token]);
 
     const headers = { Authorization: `Bearer ${token}` };
 
