@@ -250,23 +250,54 @@ async def execute_python_test(code: str, input_data: dict, expected):
     Returns:
         dict: Test result with pass/fail status.
     """
-    # Extract function name via regex
-    func_match = re.search(r"def\s+(\w+)\s*\(", code)
-    if not func_match:
-        return {"passed": False, "error": "Could not find function definition in code"}
+    import ast as _ast
 
-    func_name = func_match.group(1)
+    # Use AST to find the best-matching top-level function.
+    # "Best match" = most input_data keys present in the function's parameter list.
+    # This handles helper functions, classes, and inner-function definitions correctly.
+    func_name = None
+    try:
+        tree = _ast.parse(code)
+        candidates = []
+        for node in tree.body:
+            if isinstance(node, _ast.FunctionDef):
+                params = [arg.arg for arg in node.args.args]
+                match_count = sum(1 for k in input_data.keys() if k in params)
+                candidates.append((match_count, node.name))
+        if candidates:
+            candidates.sort(key=lambda x: -x[0])
+            func_name = candidates[0][1]
+    except Exception:
+        pass
 
-    # Build test code
+    if not func_name:
+        func_match = re.search(r"def\s+(\w+)\s*\(", code)
+        if not func_match:
+            return {"passed": False, "error": "Could not find function definition in code"}
+        func_name = func_match.group(1)
+
+    # Embed input_data as a Python repr so we hold references to the actual
+    # objects — this allows us to detect in-place modifications (e.g. rotate()
+    # returns None but mutates nums directly).
+    params_repr = repr(input_data)
+
     test_code = f"""{code}
 
 # Test execution
-import json
+import json as _json
+_params = {params_repr}
 try:
-    result = {func_name}({', '.join(f'{k}={json_module.dumps(v)}' for k, v in input_data.items())})
-    print("__RESULT__:", json.dumps(result))
-except Exception as e:
-    print("__ERROR__:", str(e))
+    _result = {func_name}(**_params)
+    # If the function returns None it likely modified an argument in-place.
+    # Return the first list/dict argument as the result in that case.
+    if _result is None:
+        for _v in _params.values():
+            if isinstance(_v, (list, dict)):
+                _result = _v
+                break
+    print("__RESULT__:", _json.dumps(_result))
+except Exception as _e:
+    print("__ERROR__:", str(_e))
 """
 
     with tempfile.NamedTemporaryFile(
@@ -333,14 +364,33 @@ async def execute_javascript_test(code: str, input_data: dict, expected):
 
     func_name = func_match.group(1)
 
-    # Build test code
-    args_str = ", ".join(json_module.dumps(v) for v in input_data.values())
+    # Build named variables for each input so in-place mutations are captured.
+    var_lines = []
+    var_names = []
+    first_array_var = None
+    for key, val in input_data.items():
+        var_name = f"__var_{key}"
+        var_lines.append(f"    let {var_name} = {json_module.dumps(val)};")
+        var_names.append(var_name)
+        if first_array_var is None and isinstance(val, list):
+            first_array_var = var_name
+
+    args_str = ", ".join(var_names)
+
+    # If the function returns undefined (void-like), fall back to first array arg
+    if first_array_var:
+        result_expr = f"(__result === undefined || __result === null) ? {first_array_var} : __result"
+    else:
+        result_expr = "__result"
+
     test_code = f"""{code}
 
 // Test execution
 try {{
-    const result = {func_name}({args_str});
-    console.log("__RESULT__:", JSON.stringify(result));
+{chr(10).join(var_lines)}
+    const __result = {func_name}({args_str});
+    const __final = {result_expr};
+    console.log("__RESULT__:", JSON.stringify(__final));
 }} catch (e) {{
     console.log("__ERROR__:", e.message);
 }}
@@ -434,14 +484,32 @@ async def execute_typescript_test(code: str, input_data: dict, expected):
         return {"passed": False, "error": "Could not find function definition in code"}
 
     func_name = func_match.group(1)
-    args_str = ", ".join(json_module.dumps(v) for v in input_data.values())
+
+    # Build named variables for each input so in-place mutations are captured.
+    var_lines = []
+    var_names = []
+    first_array_var = None
+    for key, val in input_data.items():
+        var_name = f"__var_{key}"
+        var_lines.append(f"    let {var_name} = {json_module.dumps(val)};")
+        var_names.append(var_name)
+        if first_array_var is None and isinstance(val, list):
+            first_array_var = var_name
+
+    args_str = ", ".join(var_names)
+    if first_array_var:
+        result_expr = f"(__result === undefined || __result === null) ? {first_array_var} : __result"
+    else:
+        result_expr = "__result"
 
     test_code = f"""{code}
 
 // Test execution
 try {{
-    const result = {func_name}({args_str});
-    console.log("__RESULT__:", JSON.stringify(result));
+{chr(10).join(var_lines)}
+    const __result = {func_name}({args_str});
+    const __final = {result_expr};
+    console.log("__RESULT__:", JSON.stringify(__final));
 }} catch (e: unknown) {{
     console.log("__ERROR__:", (e as Error).message);
 }}
@@ -619,35 +687,105 @@ async def execute_java(code: str):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def _java_type_for_value(val) -> str:
+    """Map a Python value to the Java type string used for variable declarations."""
+    if isinstance(val, bool):
+        return "boolean"
+    if isinstance(val, int):
+        return "int"
+    if isinstance(val, float):
+        return "double"
+    if isinstance(val, str):
+        return "String"
+    if isinstance(val, list):
+        if not val:
+            return "int[]"
+        if all(isinstance(x, bool) for x in val):
+            return "boolean[]"
+        if all(isinstance(x, int) and not isinstance(x, bool) for x in val):
+            return "int[]"
+        if all(isinstance(x, float) for x in val):
+            return "double[]"
+        if all(isinstance(x, str) for x in val):
+            return "String[]"
+        if all(isinstance(x, list) and all(isinstance(y, int) for y in x) for x in val):
+            return "int[][]"
+        return "Object[]"
+    return "Object"
+
+
 async def execute_java_test(code: str, input_data: dict, expected):
     """Execute Java code with test inputs."""
     class_match = re.search(r"public\s+class\s+(\w+)", code)
     class_name = class_match.group(1) if class_match else "Solution"
 
-    # Find first public non-main method
-    method_match = None
+    # Find best-matching public non-main method scored by param name overlap with input_data keys.
+    # This handles helper methods and multiple public methods gracefully.
+    best_method = None
+    best_score = -1
     for m in re.finditer(
-        r"public\s+(?:static\s+)?(?!class\b)(\w[\w\[\]<>,\s]*)\s+(\w+)\s*\(([^)]*)\)",
+        r"public\s+(?:static\s+)?(?!class\b)(\w[\w\[\]<>,\s]*?)\s+(\w+)\s*\(([^)]*)\)",
         code,
     ):
-        if m.group(2) != "main":
-            method_match = m
-            break
+        method_name_candidate = m.group(2)
+        if method_name_candidate in ("main", "Main"):
+            continue
+        raw_params = m.group(3)
+        param_names = [
+            p.strip().split()[-1]
+            for p in raw_params.split(",")
+            if p.strip() and len(p.strip().split()) >= 2
+        ]
+        score = sum(1 for k in input_data.keys() if k in param_names)
+        if score > best_score:
+            best_score = score
+            best_method = m
 
-    if not method_match:
+    if not best_method:
         return {"passed": False, "error": "Could not find a public method in the Java code"}
 
-    method_name = method_match.group(2)
-    is_static = bool(re.search(r"public\s+static\s+", method_match.group(0)))
-    args_str = ", ".join(_python_to_java_literal(v) for v in input_data.values())
-    invocation = (
-        f"{class_name}.{method_name}({args_str})"
-        if is_static
-        else f"new {class_name}().{method_name}({args_str})"
-    )
+    return_type = best_method.group(1).strip()
+    method_name = best_method.group(2)
+    is_static = bool(re.search(r"public\s+static\s+", best_method.group(0)))
+    is_void = return_type == "void"
 
-    # Make Solution class non-public so Main can be the public class in a single file
-    modified_code = re.sub(r"\bpublic(\s+class\s+" + class_name + r"\b)", r"\1", code)
+    # Strip public from ALL user-defined types so only Main is public in Main.java.
+    # This allows users to define enums, interfaces, helper classes etc.
+    modified_code = re.sub(r"\bpublic(\s+(?:class|enum|interface|record)\s+)", r"\1", code)
+
+    if is_void:
+        # Void method — create named variables for each input so in-place mutations are captured.
+        var_decls = []
+        var_names = []
+        first_array_var = None
+        for key, val in input_data.items():
+            var_name = f"__var_{key}"
+            java_type = _java_type_for_value(val)
+            literal = _python_to_java_literal(val)
+            var_decls.append(f"            {java_type} {var_name} = {literal};")
+            var_names.append(var_name)
+            if first_array_var is None and isinstance(val, list):
+                first_array_var = var_name
+
+        instance = class_name if is_static else f"new {class_name}()"
+        call_line = f"            {instance}.{method_name}({', '.join(var_names)});"
+        if first_array_var:
+            result_line = f'            System.out.println("__RESULT__: " + __toJson({first_array_var}));'
+        else:
+            result_line = '            System.out.println("__RESULT__: null");'
+
+        main_try_body = "\n".join(var_decls) + f"\n{call_line}\n{result_line}"
+    else:
+        args_str = ", ".join(_python_to_java_literal(v) for v in input_data.values())
+        invocation = (
+            f"{class_name}.{method_name}({args_str})"
+            if is_static
+            else f"new {class_name}().{method_name}({args_str})"
+        )
+        main_try_body = (
+            f'            Object result = (Object) {invocation};\n'
+            f'            System.out.println("__RESULT__: " + __toJson(result));'
+        )
 
     test_source = f"""{modified_code}
 
@@ -655,8 +793,7 @@ public class Main {{
 {_JAVA_TO_JSON_HELPER}
     public static void main(String[] args) {{
         try {{
-            Object result = (Object) {invocation};
-            System.out.println("__RESULT__: " + __toJson(result));
+{main_try_body}
         }} catch (Exception e) {{
             System.out.println("__ERROR__: " + e.getMessage());
         }}
@@ -802,42 +939,112 @@ async def execute_csharp(code: str):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def _csharp_type_for_value(val) -> str:
+    """Map a Python value to the C# type string used for variable declarations."""
+    if isinstance(val, bool):
+        return "bool"
+    if isinstance(val, int):
+        return "int"
+    if isinstance(val, float):
+        return "double"
+    if isinstance(val, str):
+        return "string"
+    if isinstance(val, list):
+        if not val:
+            return "int[]"
+        if all(isinstance(x, bool) for x in val):
+            return "bool[]"
+        if all(isinstance(x, int) and not isinstance(x, bool) for x in val):
+            return "int[]"
+        if all(isinstance(x, float) for x in val):
+            return "double[]"
+        if all(isinstance(x, str) for x in val):
+            return "string[]"
+        if all(isinstance(x, list) and all(isinstance(y, int) for y in x) for x in val):
+            return "int[][]"
+        return "object[]"
+    return "object"
+
+
 async def execute_csharp_test(code: str, input_data: dict, expected):
     """Execute C# code with test inputs."""
     class_match = re.search(r"(?:public\s+)?class\s+(\w+)", code)
     class_name = class_match.group(1) if class_match else "Solution"
 
-    method_match = None
+    # Find best-matching public non-Main method scored by param name overlap with input_data keys.
+    best_method = None
+    best_score = -1
     for m in re.finditer(
-        r"public\s+(?:static\s+)?(?!class\b)(\w[\w\[\]<>,?\s]*)\s+(\w+)\s*\(([^)]*)\)",
+        r"public\s+(?:static\s+)?(?!class\b)(\w[\w\[\]<>,?\s]*?)\s+(\w+)\s*\(([^)]*)\)",
         code,
     ):
-        if m.group(2) != "Main":
-            method_match = m
-            break
+        method_name_candidate = m.group(2)
+        if method_name_candidate in ("Main",):
+            continue
+        raw_params = m.group(3)
+        param_names = [
+            p.strip().split()[-1]
+            for p in raw_params.split(",")
+            if p.strip() and len(p.strip().split()) >= 2
+        ]
+        score = sum(1 for k in input_data.keys() if k in param_names)
+        if score > best_score:
+            best_score = score
+            best_method = m
 
-    if not method_match:
+    if not best_method:
         return {"passed": False, "error": "Could not find a public method in the C# code"}
 
-    method_name = method_match.group(2)
-    is_static = bool(re.search(r"public\s+static\s+", method_match.group(0)))
-    args_str = ", ".join(_python_to_csharp_literal(v) for v in input_data.values())
-    invocation = (
-        f"{class_name}.{method_name}({args_str})"
-        if is_static
-        else f"new {class_name}().{method_name}({args_str})"
-    )
+    return_type = best_method.group(1).strip()
+    method_name = best_method.group(2)
+    is_static = bool(re.search(r"public\s+static\s+", best_method.group(0)))
+    is_void = return_type == "void"
 
     # Strip using directives from user code (ImplicitUsings covers common ones)
     stripped_code = re.sub(r"^\s*using\s+[\w.]+;\s*\n?", "", code, flags=re.MULTILINE)
+    # Strip public from all user-defined types so there's no accessibility conflict
+    stripped_code = re.sub(r"\bpublic(\s+(?:class|enum|interface|record|struct)\s+)", r"\1", stripped_code)
+
+    if is_void:
+        # Void method — create named variables so in-place mutations are captured.
+        var_decls = []
+        var_names = []
+        first_array_var = None
+        for key, val in input_data.items():
+            var_name = f"__var_{key}"
+            cs_type = _csharp_type_for_value(val)
+            literal = _python_to_csharp_literal(val)
+            var_decls.append(f"            {cs_type} {var_name} = {literal};")
+            var_names.append(var_name)
+            if first_array_var is None and isinstance(val, list):
+                first_array_var = var_name
+
+        instance = class_name if is_static else f"new {class_name}()"
+        call_line = f"            {instance}.{method_name}({', '.join(var_names)});"
+        if first_array_var:
+            result_line = f'            Console.WriteLine("__RESULT__: " + System.Text.Json.JsonSerializer.Serialize({first_array_var}));'
+        else:
+            result_line = '            Console.WriteLine("__RESULT__: null");'
+
+        main_try_body = "\n".join(var_decls) + f"\n{call_line}\n{result_line}"
+    else:
+        args_str = ", ".join(_python_to_csharp_literal(v) for v in input_data.values())
+        invocation = (
+            f"{class_name}.{method_name}({args_str})"
+            if is_static
+            else f"new {class_name}().{method_name}({args_str})"
+        )
+        main_try_body = (
+            f'            var result = {invocation};\n'
+            f'            Console.WriteLine("__RESULT__: " + System.Text.Json.JsonSerializer.Serialize(result));'
+        )
 
     test_source = f"""{stripped_code}
 
 class __TestRunner {{
     static void Main() {{
         try {{
-            var result = {invocation};
-            Console.WriteLine("__RESULT__: " + System.Text.Json.JsonSerializer.Serialize(result));
+{main_try_body}
         }} catch (Exception e) {{
             Console.WriteLine("__ERROR__: " + e.Message);
         }}

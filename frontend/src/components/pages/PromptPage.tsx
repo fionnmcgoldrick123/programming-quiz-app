@@ -22,7 +22,7 @@ const models = [
 ];
 
 function PromptPage(){
-    const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+    const { isAuthenticated, isLoading: authLoading, user, token } = useAuth();
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [quizType, setQuizType] = useState<QuizType | null>(null);
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
@@ -86,7 +86,10 @@ function PromptPage(){
         try {
             await fetch("http://127.0.0.1:8000/model", {
                 method: "POST",
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify({ model })
             });
         } catch (error) {
