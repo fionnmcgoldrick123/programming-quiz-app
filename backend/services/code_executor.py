@@ -106,7 +106,6 @@ async def submit_code(request: SubmitCodeRequest):
         dict: Test results with pass/fail status for each test case.
     """
     try:
-        # Parse test cases
         test_results = []
         all_passed = True
 
@@ -119,12 +118,10 @@ async def submit_code(request: SubmitCodeRequest):
                 # before ] or } so we don't produce malformed JSON.
                 sanitised = _sanitise_test_case_str(test_case_str)
 
-                # Parse the JSON test case
                 test_case = json_module.loads(sanitised)
                 input_data = test_case.get("input", {})
                 expected = test_case.get("expected")
 
-                # Execute the code with test input
                 result = await execute_code_with_test(
                     request.code, request.language, input_data, expected
                 )

@@ -106,7 +106,6 @@ async def openai_request(prompt: PromptRequest):
             else:
                 logger.error(f"All {MAX_RETRIES} attempts failed for quiz generation")
     
-    # If all retries failed, return a 500 error
     raise HTTPException(
         status_code=500,
         detail="Failed to generate quiz after multiple attempts. Please try again later."

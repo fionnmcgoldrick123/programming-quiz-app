@@ -348,6 +348,36 @@ Both trained model files must be present for the backend to perform difficulty a
 
 ---
 
+## AI Usage Declaration
+
+Generative AI tools were used during the development of this project in a supplementary capacity, consistent with responsible academic practice. AI was used to assist with routine coding tasks, clarify technical concepts, and help debug implementation issues. All design decisions, architectural choices, and written work are the author's own. AI-generated content was reviewed, adapted, and integrated only where it was accurate and appropriate.
+
+### Examples of AI Assistance
+
+**Prompt:** "In Python, what is the correct way to load a scikit-learn pipeline from a pickle file exactly once at module import time so that inference requests do not repeatedly deserialise the model?"
+
+**Response summary:** The AI explained using a module-level variable initialised to `None` and a `_load_model()` helper that checks this guard before calling `joblib.load()`. It noted that this pattern ensures the model is deserialised only on the first call and reused for all subsequent requests within the same process lifetime.
+
+---
+
+**Prompt:** "How does One-vs-Rest multi-label classification work, and why would I choose it over a classifier chain for a topic tagging task?"
+
+**Response summary:** The AI explained that One-vs-Rest trains one independent binary classifier per label, making it straightforward to tune per-label decision thresholds after training. It noted that classifier chains model label correlations but are slower to train and more sensitive to label ordering. For a topic tagging task where labels are largely independent, One-vs-Rest was described as a practical and interpretable choice.
+
+---
+
+**Prompt:** "I am using FastAPI with JWT authentication. How do I protect an endpoint so that only authenticated users can access it, and how do I extract the user ID from the token inside the route?"
+
+**Response summary:** The AI showed how to use `Depends()` with a custom `verify_token` function that reads the `Authorization` header via `HTTPBearer`, decodes the JWT with `PyJWT`, and returns the payload as a dict. It demonstrated injecting this dependency directly into the route signature so the decoded payload is available without writing repeated boilerplate in each handler.
+
+---
+
+**Prompt:** "What is a safe and simple way to run user-submitted Python and JavaScript code server-side in a subprocess with a timeout?"
+
+**Response summary:** The AI outlined using Python's `subprocess.run()` with `timeout`, `capture_output=True`, and writing the submitted code to a temporary file via `tempfile.NamedTemporaryFile`. It highlighted the importance of cleaning up the temporary file after execution and treating all subprocess output as untrusted. It also noted that true sandboxing requires OS-level isolation and that the subprocess approach carries inherent risk in a production environment.
+
+---
+
 ## Author
 
 Fionn McGoldrick | G00422349

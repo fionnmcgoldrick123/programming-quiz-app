@@ -9,7 +9,6 @@ function ComboBox({ selectedModel, onModelChange }: ComboBoxProps){
 
     function handleChange(e : React.ChangeEvent<HTMLSelectElement>){
         const selectModel = e.target.value;
-        console.log(selectModel);
         onModelChange(selectModel);
         
         try{

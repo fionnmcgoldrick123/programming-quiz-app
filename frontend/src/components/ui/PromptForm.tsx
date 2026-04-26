@@ -58,7 +58,6 @@ function PromptForm({ selectedModel, quizType, selectedLanguage }: PromptFormPro
 
         
         const quiz = await response.json();
-        console.log("Quiz from backend:", quiz);
         
         if (quizType === 'coding') {
             navigate('/code-sandbox', { state: { quizData: quiz, language: selectedLanguage, sessionId: Date.now() } });
