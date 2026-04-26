@@ -11,6 +11,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{fancyhdr}
@@ -25,10 +27,24 @@
 \usepackage{colortbl}
 \usepackage{array}
 \usepackage{geometry}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \pagestyle{fancy}
 \renewcommand\headrulewidth{1pt}
 \usepackage{float}
+\usepackage{microtype}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    breakatwhitespace=false,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    xleftmargin=\parindent,
+    showstringspaces=false
+}
 
 %------------------------------------------------------------------------------------------------------
 %	The following are the RGB values for the official ATU colours.
@@ -117,12 +133,16 @@
 %                 its own file. The chapters below are based on the guidelines 
 %                 given in the lecture.
 %----------------------------------------------------------------------------------------
+\include{abstract}
 \include{introduction}
 \include{methodology}
 \include{review}
 \include{design}
 \include{evaluation}
 \include{conclusion}
+
+
+
 
 
 
@@ -134,4 +154,6 @@
 %------------------------------------------------------------------------------------------------------	
 \bibliographystyle{unsrt}
 \bibliography{references.bib}
+
+\include{intallation}
 \end{document}

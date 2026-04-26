@@ -57,14 +57,13 @@ Seven candidate models were evaluated using five fold cross validation
 and k Nearest Neighbours. Validation accuracy scores are shown in
 Figure \ref{fig:difficulty-model-comparison}.
 
+Although F1 macro was used as the scoring criterion during RandomizedSearchCV to ensure balanced evaluation across the three difficulty classes, \ref{fig:difficulty-model-comparison} reports validation accuracy for each model to give an intuitive sense of overall prediction quality. The ranking of models is consistent across both metrics.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]
         {./images/evaluation/model_comparison.png}
-    \caption{Validation accuracy comparison across all seven candidate
-    difficulty classifier models. XGBoost achieved the highest
-    validation accuracy at 0.605, narrowly ahead of HistGradientBoosting
-    at 0.597.}
+    \caption{Validation accuracy comparison across all seven candidate difficulty classifier models after RandomizedSearchCV tuning. Model selection during cross validation was scored on F1 macro; accuracy is reported here for comparability. XGBoost achieved the highest validation accuracy at 0.605.}
     \label{fig:difficulty-model-comparison}
 \end{figure}
 
@@ -160,10 +159,10 @@ no label at all.
 
 \subsection{Dataset Analysis}
 
-The topic tag classifier was trained on LeetCode \cite{leetcode2025}
+The topic tag classifier was trained on LeetCode \cite{kaggleleetcode2025}
 problems as a multi label classification task, since a single problem
 may be associated with multiple algorithmic topic tags. After removing
-tags with fewer than 20 samples, ten classes were retained: Array,
+tags with fewer than 60 samples, ten classes were retained: Array,
 String, Math, Hash Table, Database, Tree, Dynamic Programming, Linked
 List, Two Pointers, and Depth First Search. The class distribution
 before and after filtering is shown in Figure
@@ -341,7 +340,7 @@ results are summarised in Table \ref{table:tag-results-final}.
         \hline
         Accuracy    & 0.805 & 0.805 \\
         F1 Macro    & 0.646 & 0.622 \\
-        F1 Weighted & 0.802 & \\
+        F1 Weighted & 0.802 & 0.794 \\
         \hline
     \end{tabular}
     \caption{Final SGD Classifier performance on validation and test
@@ -540,7 +539,7 @@ of the six objectives defined in the Introduction.
         \textbf{\#} & \textbf{Objective} & \textbf{Status} &
         \textbf{Notes} \\
         \hline
-        1 & Full stack web application with AI powered MCQ and coding
+        1 & Full-stack web application with AI powered MCQ and coding
             challenge generation supporting multiple AI backends
           & Met
           & Both OpenAI and Ollama backends functional. JSON parsing

@@ -2,7 +2,7 @@
 
 \section{Development Approach}
 
-This project is primarily centred on the design and development of a full stack software system. The main objective was to build and deliver a functional application, and the process was therefore guided by established software engineering practices. However, the development was supported by a focused research component, particularly in the areas of machine learning model selection and training, where decisions around algorithms, datasets, and evaluation strategies were informed by existing literature and exploratory experimentation before implementation. An empirical approach was applied throughout: rather than fixing a design upfront, each subsystem was developed, tested, measured, and refined based on observed performance.
+This project is primarily centred on the design and development of a full-stack software system. The main objective was to build and deliver a functional application, and the process was therefore guided by established software engineering practices. However, the development was supported by a focused research component, particularly in the areas of machine learning model selection and training, where decisions around algorithms, datasets, and evaluation strategies were informed by existing literature and exploratory experimentation before implementation. An empirical approach was applied throughout: rather than fixing a design upfront, each subsystem was developed, tested, measured, and refined based on observed performance.
 
 The overarching development approach was agile, iterative, and incremental,
 drawing on the principles of the Agile Manifesto \cite{agilemanifesto2001}
@@ -82,10 +82,7 @@ the entire codebase non functional for more than a short period while a
 breaking change was integrated. This mattered because it allowed problems
 to be caught early, when the context of what had just changed was still
 fresh, rather than at the end of a long development phase when the source
-of a bug could be difficult to trace. The principle at work here is
-essentially the same one that underlies continuous integration: small,
-frequent changes are cheaper to verify and cheaper to revert than large
-ones.
+of a bug could be difficult to trace. This mirrors the principle behind continuous integration: smaller changes are easier to test and revert than large ones.
 
 Where technical problems arose, an empirical approach was taken. When the
 topic tag classifier initially produced poor results, for example, the
@@ -152,7 +149,7 @@ installs Node.js 22 and the project dependencies, runs ESLint to check
 for code quality issues, performs a TypeScript type check using
 \texttt{tsc --noEmit} to catch type errors without producing output files,
 and then runs the production build using Vite \cite{vite2025} to confirm
-that the application compiles successfully. Passing build artifacts are
+that the application compiles successfully. Passing build artefacts are
 uploaded for a retention period of seven days. The backend job sets up
 Python 3.11, runs the Black formatter in check mode to verify that the
 code conforms to the project's formatting standard, runs Flake8 to catch
@@ -169,10 +166,7 @@ confidence when merging feature branches that the integration would not
 break the build. The use of \texttt{continue-on-error: true} on the
 formatting and complexity checks meant that these were informational
 rather than blocking, allowing the pipeline to surface stylistic feedback
-without preventing progress when minor formatting divergences were present.
-This calibration matters: a pipeline that fails on every whitespace
-difference ends up being ignored by its author, whereas a pipeline that
-fails only on genuinely broken builds retains its value as a signal.
+without preventing progress when minor formatting divergences were present. This balance is important, as overly strict pipelines tend to be ignored, while meaningful failures remain useful signals.
 
 \section{Validation and Testing}
 

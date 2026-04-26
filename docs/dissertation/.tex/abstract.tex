@@ -1,0 +1,39 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This dissertation presents the design, implementation, and evaluation
+of a full-stack web platform that generates personalised programming
+quizzes and coding challenges on demand using large language model
+generation. The system addresses a limitation in existing technical education tools: existing platforms either offer static question banks that
+grow stale, or expose raw AI-generated content without structure,
+difficulty signals, or topic labels. The platform developed here
+bridges that gap by combining the generative capability of large
+language models with two custom-trained machine learning classifiers
+that automatically enrich every generated question with a predicted
+algorithmic topic tag and a predicted difficulty level, without
+requiring a second model call or any manual curation.
+
+The topic tag classifier was trained on a corpus of LeetCode
+programming problems using a stochastic gradient descent estimator
+over a combined word-level and character-level TF-IDF feature
+representation. It achieved a test set accuracy of 0.805 and an
+F1 macro score of 0.622 across ten algorithmic topic classes.
+The difficulty classifier was trained on IBM Project CodeNet,
+a dataset of over fourteen million competitive programming
+submissions, using an XGBoost ensemble over engineered features
+derived from submission statistics and problem description text.
+Difficulty labels were derived from acceptance rate percentile
+binning in the absence of explicit human annotations, and the
+final model achieved a test set accuracy of 0.593 on a balanced
+three-class problem. Both classifiers are deployed as in-process
+singletons within a Python FastAPI backend, adding negligible
+inference latency per generated question.
+
+The platform additionally includes a sandboxed multi-language code
+execution engine supporting Python, JavaScript, TypeScript, Java,
+and C\#, a Monaco Editor coding environment, a JWT-authenticated
+user account system with an experience point and levelling
+mechanic, and a social friends network. The full system is
+containerised using Docker Compose and deployable with a single
+command. All six project objectives were met and evaluated against
+measurable criteria on held-out test sets.

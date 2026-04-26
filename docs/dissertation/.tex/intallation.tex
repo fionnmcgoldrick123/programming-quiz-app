@@ -1,0 +1,80 @@
+\appendix
+
+\chapter{Installation and Repository}
+
+The full source code for this project is publicly available at:
+
+\begin{center}
+\texttt{https://github.com/fionnmcgoldrick123/programming-quiz-app}
+\end{center}
+
+\section*{System Requirements}
+
+The platform is containerised and requires the following software
+to be installed on the host machine:
+
+\begin{itemize}
+    \item Docker (version 24.0 or later)
+    \item Docker Compose (version 2.20 or later)
+    \item Git
+\end{itemize}
+
+\section*{Quick Start}
+
+\begin{enumerate}
+    \item \textbf{Clone the repository:}
+    \begin{lstlisting}[language=bash]
+git clone https://github.com/fionnmcgoldrick123/programming-quiz-app
+cd programming-quiz-app
+    \end{lstlisting}
+
+    \item \textbf{Create the environment configuration file:}
+    \begin{lstlisting}[language=bash]
+cp .env.example .env
+    \end{lstlisting}
+
+    \item \textbf{Set the following required variables inside \texttt{.env}:}
+    \begin{itemize}
+        \item \texttt{OPENAI\_API\_KEY} --- OpenAI API key for
+        GPT-4o-mini generation
+        \item \texttt{JWT\_SECRET} --- secret key for JWT signing
+        (generate with \texttt{openssl rand -hex 32})
+        \item \texttt{POSTGRES\_PASSWORD} --- database password
+        \item \texttt{SMTP\_HOST}, \texttt{SMTP\_USERNAME},
+        \texttt{SMTP\_PASSWORD}, \texttt{SMTP\_FROM} --- email
+        server credentials for user verification
+    \end{itemize}
+
+    \item \textbf{Build and start all services:}
+    \begin{lstlisting}[language=bash]
+docker-compose up --build
+    \end{lstlisting}
+
+    The build process takes approximately two to three minutes on
+    first run. On completion, the services are accessible at the
+    following addresses:
+    \begin{itemize}
+        \item Frontend: \texttt{http://localhost:3000}
+        \item Backend API: \texttt{http://localhost:8000}
+        \item API documentation: \texttt{http://localhost:8000/docs}
+    \end{itemize}
+
+    \item \textbf{To stop all services:}
+    \begin{lstlisting}[language=bash]
+docker-compose down
+    \end{lstlisting}
+\end{enumerate}
+
+\section*{Retraining the Machine Learning Models}
+
+The serialised model artefacts are included in the repository and
+loaded automatically at startup. Should retraining be required, the
+difficulty classifier training script is located at
+\texttt{ml\_models/difficulty\_classifier/difficulty\_predictor.py}
+and requires the \texttt{CODENET\_PATH} environment variable to point
+to the root of the IBM Project CodeNet dataset. The topic tag
+classifier training script is located at
+\texttt{ml\_models/tag\_classifier/train.py} and reads from the
+included \texttt{leetcode.csv} file. Both scripts save their output
+to \texttt{difficulty\_model.pkl} and \texttt{topic\_model.pkl}
+respectively.

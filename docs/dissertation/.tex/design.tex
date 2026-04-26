@@ -21,7 +21,7 @@ through well defined interfaces. The backend exposes a REST API
 \cite{openapi2025}, and the frontend communicates exclusively through
 that API using JSON \cite{json2014} over HTTP. No service depends on the
 internal state of any other service, and the only inter service contracts
-are the REST API and the SQL schema.
+are the REST API and the SQL schema. The three services and their communication paths are illustrated in Figure~\ref{fig:system-architecture}.
 
 \begin{figure}[H]
     \centering
@@ -71,7 +71,7 @@ database tables if they do not already exist, using idempotent
 migrations on an existing database are safe. The application is
 structured around four concerns: AI model integration, machine learning
 inference, code execution, and user management, which includes
-authentication, gamification, and social features.
+authentication, gamification, and social features. The call relationships between these modules are shown in Figure~\ref{fig:backend-deps}.
 
 \begin{figure}[H]
     \centering
@@ -176,28 +176,32 @@ limited to a single \texttt{pipeline.predict\_proba()} call and a
 threshold comparison, which is negligible compared to the AI generation
 latency.
 
+{\sloppy
 A compatibility fix is applied when loading the difficulty model: the
-helper functions defined in the \texttt{\_\_main\_\_} namespace at
-training time are re injected into \texttt{sys.modules['\_\_main\_\_']}
-before \texttt{joblib.load} is called, preventing an
-\path{AttributeError} during deserialisation.
+helper functions defined in the \verb|__main__| namespace at
+training time are re-injected into \verb|sys.modules['__main__']|
+before \verb|joblib.load| is called, preventing an
+\verb|AttributeError| during deserialisation.
+\par}
 
+{\sloppy
 \textbf{Topic tag prediction.} The topic tag classifier is a scikit
-learn \texttt{Pipeline} \cite{pedregosa2011,buitinck2013api} wrapping a
-\texttt{FeatureUnion} of two \texttt{TfidfVectorizer} instances (word
+learn \verb|Pipeline| \cite{pedregosa2011,buitinck2013api} wrapping a
+\verb|FeatureUnion| of two \verb|TfidfVectorizer| instances (word
 level unigram to trigram and character level three to five n grams)
-followed by a \texttt{OneVsRestClassifier} wrapping a
-\texttt{LogisticRegression} estimator with balanced class weights. At
-inference time, the \path{predict\_topic\_from\_parts(title,
-description, top\_n=5)} function concatenates the title and description
-with a period separator, calls \texttt{pipeline.predict\_proba()} to
-obtain a probability score for each of the trained labels, applies the
-per label optimised thresholds (stored in the \texttt{.pkl} bundle
-alongside the pipeline and the \texttt{MultiLabelBinarizer}), and
-returns up to five tags sorted by descending probability. If no label
-exceeds its threshold, the label with the highest probability is
-returned anyway, guaranteeing that every generated question carries at
-least one meaningful topic annotation.
+followed by a \verb|OneVsRestClassifier| wrapping a
+\verb|LogisticRegression| estimator with balanced class weights. At
+inference time, the
+\verb|predict_topic_from_parts(title, description, top_n=5)| function
+concatenates the title and description with a period separator, calls
+\verb|pipeline.predict_proba()| to obtain a probability score for each
+of the trained labels, applies the per label optimised thresholds
+(stored in the \verb|.pkl| bundle alongside the pipeline and the
+\verb|MultiLabelBinarizer|), and returns up to five tags sorted by
+descending probability. If no label exceeds its threshold, the label
+with the highest probability is returned anyway, guaranteeing that
+every generated question carries at least one meaningful topic annotation.
+\par}
 
 \textbf{Difficulty prediction.} The difficulty classifier is a scikit
 learn \texttt{Pipeline} wrapping a \texttt{ColumnTransformer} that
@@ -254,7 +258,7 @@ on the held out test set. The full pipeline, including the
 
 The topic tag training pipeline, in \texttt{ml\_models/tag\_classifier/train.py},
 follows a similar structure but is adapted to the multi label nature of
-the problem. The LeetCode \cite{leetcode2025} CSV is loaded, rows with
+the problem. The LeetCode \cite{kaggleleetcode2025} CSV is loaded, rows with
 null descriptions or null tag lists are dropped, and the tag strings
 are parsed from their stored representation into lists. Tags appearing
 in fewer than sixty problems are filtered out, and any row with no
@@ -267,12 +271,7 @@ cleaned\_description} string per problem. The feature pipeline is a
 \texttt{FeatureUnion} of a word level TF IDF vectoriser (up to fifty
 thousand features, unigrams through trigrams) and a character level
 TF IDF vectoriser (up to twenty thousand features, three to five
-character n grams). Four candidate architectures are trained using
-\texttt{GridSearchCV} with three fold cross validation, scoring on F1
-micro: logistic regression with word features only, logistic regression
-with combined word and character features, an SGD classifier with word
-features, and a classifier chain \cite{read2011classifierchains} of
-logistic regressions with combined features.
+character n grams). Seven candidate architectures are trained using GridSearchCV with three fold cross validation, scoring on F1 micro: logistic regression with word features only, logistic regression with combined word and character features, an SGD classifier with word features, a classifier chain of logistic regressions with combined features, Multinomial Naive Bayes, Complement Naive Bayes, Random Forest, k Nearest Neighbours, and Linear SVC. All models use a OneVsRestClassifier wrapper except the classifier chain, which handles label dependencies directly.
 
 A two stage threshold optimisation is then performed on the validation
 set. Stage A finds a single global optimum threshold by sweeping from
@@ -294,6 +293,14 @@ thresholds, and the class list are all serialised together in
 
 \subsection{Code Execution Engine}
 
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{./images/design/code_execution_engine.png}
+    \caption{Flowchart of the code execution engine, tracing the path from an incoming request through runtime selection, subprocess execution, test harness injection, and result evaluation.}
+    \label{fig:code-exec}
+\end{figure}
+
 The code execution engine is implemented in
 \texttt{services/code\_executor.py} and runs inside the FastAPI process
 rather than as a separate service. For both \texttt{POST /run-code} and
@@ -303,7 +310,7 @@ appropriate runtime as a child process using \texttt{subprocess.run()},
 captures stdout and stderr, and deletes the temporary file in a
 \texttt{finally} block before returning. A five second timeout is
 enforced on every subprocess call. Submissions that exceed this limit
-are terminated and a timeout message is returned to the caller.
+are terminated and a timeout message is returned to the caller. The complete flow is shown in Figure~\ref{fig:code-exec}.
 
 The runtime invocation strategy varies by language. Python uses the
 \texttt{python} interpreter directly. JavaScript uses \texttt{node}.
@@ -370,8 +377,7 @@ cover multiple levels at once.
     \label{fig:database-design}
 \end{figure}
 
-The database schema consists of four tables: \texttt{users},
-\texttt{quiz\_results}, \texttt{friendships}, and \texttt{quiz\_sessions}.
+As shown in Figure~\ref{fig:database-design}, the database schema consists of four tables: \texttt{users}, \texttt{quiz\_results}, \texttt{friendships}, and \texttt{quiz\_sessions}.
 The schema is created at application startup by \texttt{init\_db()}
 using raw SQL \texttt{CREATE TABLE IF NOT EXISTS} statements, meaning
 the tables are created automatically on first run without requiring a
@@ -506,7 +512,7 @@ incoming requests, and viewing the current friends list.
 \end{figure}
 
 To make the interaction between components concrete, this section
-traces the complete path of a quiz generation and submission session.
+traces the complete path of a quiz generation and submission session, as illustrated in Figure~\ref{fig:end-to-end}.
 The authenticated user submits a form at \texttt{/prompt} requesting
 five Python coding challenges on a chosen topic. The browser sends
 \texttt{POST /prompt} with the bearer JWT in the request header, and
